@@ -16,17 +16,12 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package alvintocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage;
 
-import static org.testng.Assert.assertEquals;
+import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
-import org.testng.annotations.Test;
+public interface AlvinToCoraConverter {
 
-public class NotImplementedExceptionTest {
-	@Test
-	public void testInit() {
-		String message = "message";
-		NotImplementedException exception = NotImplementedException.withMessage(message);
-		assertEquals(exception.getMessage(), "message");
-	}
+	DataGroup fromXML(String xml);
+
 }

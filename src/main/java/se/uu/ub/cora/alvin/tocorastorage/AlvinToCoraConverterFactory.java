@@ -16,26 +16,10 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package alvintocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage;
 
-public final class ParseException extends RuntimeException {
+public interface AlvinToCoraConverterFactory {
 
-	private static final long serialVersionUID = 1L;
-
-	public static ParseException withMessage(String message) {
-		return new ParseException(message);
-	}
-
-	public static ParseException withMessageAndException(String message, Exception e) {
-		return new ParseException(message, e);
-	}
-
-	private ParseException(String message) {
-		super(message);
-	}
-
-	private ParseException(String message, Exception e) {
-		super(message, e);
-	}
+	AlvinToCoraConverter factor(String type);
 
 }

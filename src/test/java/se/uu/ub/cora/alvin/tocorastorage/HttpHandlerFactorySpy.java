@@ -1,4 +1,4 @@
-package alvintocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage;
 
 import java.util.ArrayList;
 import java.util.List;

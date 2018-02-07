@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package alvintocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;

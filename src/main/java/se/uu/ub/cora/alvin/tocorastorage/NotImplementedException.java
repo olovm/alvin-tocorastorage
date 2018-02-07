@@ -16,27 +16,18 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package alvintocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage;
 
-import static org.testng.Assert.assertEquals;
+public final class NotImplementedException extends RuntimeException {
 
-import org.testng.annotations.Test;
+	private static final long serialVersionUID = 1L;
 
-public class ReadFedoraExceptionTest {
-	@Test
-	public void testInit() {
-		String message = "message";
-		ReadFedoraException exception = ReadFedoraException.withMessage(message);
-		assertEquals(exception.getMessage(), "message");
+	public static NotImplementedException withMessage(String message) {
+		return new NotImplementedException(message);
 	}
 
-	@Test
-	public void testWithMessageAndException() throws Exception {
-		Exception e = new Exception("some message");
-		ReadFedoraException exception = ReadFedoraException
-				.withMessageAndException("second message", e);
-		assertEquals(exception.getMessage(), "second message");
-		assertEquals(exception.getCause().getMessage(), "some message");
-
+	private NotImplementedException(String message) {
+		super(message);
 	}
+
 }

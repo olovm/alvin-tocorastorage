@@ -1,5 +1,6 @@
-package alvintocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage;
 
+import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraConverter;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
 public class AlvinToCoraConverterSpy implements AlvinToCoraConverter {
