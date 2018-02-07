@@ -3,6 +3,7 @@ package alvintocorastorage;
 import java.io.IOException;
 import java.io.StringReader;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,6 +24,8 @@ public class DocumentCreator {
 
 	private DocumentBuilder createDocumentBuilder() throws ParserConfigurationException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		dbFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		ErrorHandler errorHandlerWithoutSystemOutPrinting = new DefaultHandler();
 		dBuilder.setErrorHandler(errorHandlerWithoutSystemOutPrinting);

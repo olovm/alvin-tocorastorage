@@ -39,7 +39,7 @@ import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 
-public class AlvinToCoraRecordStorage implements RecordStorage {
+public final class AlvinToCoraRecordStorage implements RecordStorage {
 
 	private static final String PLACE = "place";
 	private HttpHandlerFactory httpHandlerFactory;

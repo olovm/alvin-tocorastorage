@@ -18,7 +18,7 @@
  */
 package alvintocorastorage;
 
-public class NotImplementedException extends RuntimeException {
+public final class NotImplementedException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

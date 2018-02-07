@@ -18,7 +18,7 @@
  */
 package alvintocorastorage;
 
-public class ParseException extends RuntimeException {
+public final class ParseException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

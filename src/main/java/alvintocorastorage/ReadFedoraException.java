@@ -18,7 +18,7 @@
  */
 package alvintocorastorage;
 
-public class ReadFedoraException extends RuntimeException {
+public final class ReadFedoraException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
