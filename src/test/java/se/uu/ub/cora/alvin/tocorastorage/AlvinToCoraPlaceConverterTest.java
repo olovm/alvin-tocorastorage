@@ -102,10 +102,25 @@ public class AlvinToCoraPlaceConverterTest {
 		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
 		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
 
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
+				"2014-12-18 20:20:38.346");
+
+		DataGroup updatedBy = recordInfo.getFirstGroupWithNameInData("updatedBy");
+		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
+		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
+
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsUpdated"),
+				"2014-12-18 20:21:20.880");
+
 		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
 		assertEquals(defaultName.getAttribute("type"), "authorized");
 		DataGroup defaultNamePart = defaultName.getFirstGroupWithNameInData("namePart");
 		assertEquals(defaultNamePart.getAttribute("type"), "defaultName");
 		assertEquals(defaultNamePart.getFirstAtomicValueWithNameInData("value"), "Linköping");
+
+		DataGroup coordinates = placeDataGroup.getFirstGroupWithNameInData("coordinates");
+		assertEquals(coordinates.getFirstAtomicValueWithNameInData("latitude"), "58.42");
+		assertEquals(coordinates.getFirstAtomicValueWithNameInData("longitude"), "15.62");
+
 	}
 }

@@ -25,6 +25,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import se.uu.ub.cora.bookkeeper.data.DataAtomic;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
@@ -56,6 +58,8 @@ public class AlvinToCoraPlaceConverter implements AlvinToCoraConverter {
 		createRecordInfoAndAddToPlace(place);
 
 		createDefaultNameAndAddToPlace(place);
+
+		createCoordinatesAndAddToPlace(place);
 		return place;
 	}
 
@@ -68,6 +72,23 @@ public class AlvinToCoraPlaceConverter implements AlvinToCoraConverter {
 
 		DataGroup createdBy = createLinkWithNameInDataAndTypeAndId("createdBy", "user", "12345");
 		recordInfo.addChild(createdBy);
+
+		String tsCreatedWithUTC = getStringFromDocumentUsingXPath(
+				"/place/recordInfo/created/date/text()");
+		String tsCreated = tsCreatedWithUTC.substring(0, tsCreatedWithUTC.indexOf("UTC") - 1);
+		recordInfo.addChild(DataAtomic.withNameInDataAndValue("tsCreated", tsCreated));
+
+		DataGroup updatedBy = createLinkWithNameInDataAndTypeAndId("updatedBy", "user", "12345");
+		recordInfo.addChild(updatedBy);
+
+		XPathExpression expr = xpath.compile("/place/recordInfo/updated/userAction/date/text()");
+		NodeList list = (NodeList) expr.evaluate(document, XPathConstants.NODESET);
+		Node item = list.item(list.getLength() - 1);
+		String tsUpdatedWithUTC = item.getTextContent();
+		String tsUpdated = tsUpdatedWithUTC.substring(0, tsUpdatedWithUTC.indexOf("UTC") - 1);
+
+		recordInfo.addChild(DataAtomic.withNameInDataAndValue("tsUpdated", tsUpdated));
+
 	}
 
 	private String getStringFromDocumentUsingXPath(String xpathString)
@@ -112,4 +133,12 @@ public class AlvinToCoraPlaceConverter implements AlvinToCoraConverter {
 				getStringFromDocumentUsingXPath("/place/defaultPlaceName/name/text()")));
 	}
 
+	private void createCoordinatesAndAddToPlace(DataGroup place) throws XPathExpressionException {
+		DataGroup coordinates = DataGroup.withNameInData("coordinates");
+		place.addChild(coordinates);
+		coordinates.addChild(DataAtomic.withNameInDataAndValue("latitude",
+				getStringFromDocumentUsingXPath("/place/latitude/text()")));
+		coordinates.addChild(DataAtomic.withNameInDataAndValue("longitude",
+				getStringFromDocumentUsingXPath("/place/longitude/text()")));
+	}
 }
