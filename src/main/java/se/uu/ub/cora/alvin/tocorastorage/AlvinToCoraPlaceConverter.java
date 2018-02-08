@@ -65,6 +65,9 @@ public class AlvinToCoraPlaceConverter implements AlvinToCoraConverter {
 
 		String pid = getStringFromDocumentUsingXPath("/place/pid/text()");
 		recordInfo.addChild(DataAtomic.withNameInDataAndValue("id", pid));
+
+		DataGroup createdBy = createLinkWithNameInDataAndTypeAndId("createdBy", "user", "12345");
+		recordInfo.addChild(createdBy);
 	}
 
 	private String getStringFromDocumentUsingXPath(String xpathString)

@@ -23,8 +23,6 @@ import static org.testng.Assert.assertEquals;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraPlaceConverter;
-import se.uu.ub.cora.alvin.tocorastorage.ParseException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
 public class AlvinToCoraPlaceConverterTest {
@@ -99,6 +97,10 @@ public class AlvinToCoraPlaceConverterTest {
 		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "alvin");
 
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"), "alvin-place:22");
+
+		DataGroup createdBy = recordInfo.getFirstGroupWithNameInData("createdBy");
+		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
+		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
 
 		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
 		assertEquals(defaultName.getAttribute("type"), "authorized");
