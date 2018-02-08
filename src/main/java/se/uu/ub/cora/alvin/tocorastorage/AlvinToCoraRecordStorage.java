@@ -18,21 +18,11 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
@@ -119,9 +109,7 @@ public final class AlvinToCoraRecordStorage implements RecordStorage {
 		}
 	}
 
-	private Collection<DataGroup> tryReadAndConvertPlaceListFromFedora()
-			throws ParserConfigurationException, SAXException, IOException,
-			XPathExpressionException {
+	private Collection<DataGroup> tryReadAndConvertPlaceListFromFedora() {
 		String placeListXML = getPlaceListXMLFromFedora();
 		NodeList list = extractNodeListWithPidsFromXML(placeListXML);
 		return constructCollectionOfPlacesFromFedora(list);
@@ -140,14 +128,10 @@ public final class AlvinToCoraRecordStorage implements RecordStorage {
 		return httpHandler;
 	}
 
-	private NodeList extractNodeListWithPidsFromXML(String placeListXML)
-			throws ParserConfigurationException, SAXException, IOException,
-			XPathExpressionException {
-		Document document = new DocumentCreator().createDocumentFromXML(placeListXML);
-		XPathFactory xpathFactory = XPathFactory.newInstance();
-		XPath xpath = xpathFactory.newXPath();
-		XPathExpression expr = xpath.compile("/result/resultList/objectFields/pid/text()");
-		return (NodeList) expr.evaluate(document, XPathConstants.NODESET);
+	private NodeList extractNodeListWithPidsFromXML(String placeListXML) {
+		XMLXPathParser parser = XMLXPathParser.forXML(placeListXML);
+		return parser
+				.getNodeListFromDocumentUsingXPath("/result/resultList/objectFields/pid/text()");
 	}
 
 	private Collection<DataGroup> constructCollectionOfPlacesFromFedora(NodeList list) {

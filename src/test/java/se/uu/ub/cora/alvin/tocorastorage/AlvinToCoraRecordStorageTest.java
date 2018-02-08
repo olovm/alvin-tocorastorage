@@ -28,9 +28,6 @@ import java.util.Iterator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraRecordStorage;
-import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
-import se.uu.ub.cora.alvin.tocorastorage.ReadFedoraException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 
@@ -115,7 +112,8 @@ public class AlvinToCoraRecordStorageTest {
 	}
 
 	@Test(expectedExceptions = ReadFedoraException.class, expectedExceptionsMessageRegExp = ""
-			+ "Unable to read list of places: The element type \"someTag\" must be terminated by the matching end-tag \"</someTag>\".")
+			+ "Unable to read list of places: Can not read xml: "
+			+ "The element type \"someTag\" must be terminated by the matching end-tag \"</someTag>\".")
 	public void readListThrowsParseExceptionOnBrokenXML() throws Exception {
 		httpHandlerFactory.responseText = "<someTag></notSameTag>";
 		alvinToCoraRecordStorage.readList("place", DataGroup.withNameInData("filter"));
