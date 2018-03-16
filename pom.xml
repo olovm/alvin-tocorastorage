@@ -36,6 +36,7 @@
 		<httphandler.version>0.2-SNAPSHOT</httphandler.version>
 		<bookkeeper.version>0.10-SNAPSHOT</bookkeeper.version>
 		<spider.version>0.14-SNAPSHOT</spider.version>
+		<sqldatabase.version>0.1-SNAPSHOT</sqldatabase.version>
 	</properties>
 
 	<scm>
@@ -75,6 +76,11 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>spider</artifactId>
 			<version>${spider.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>sqldatabase</artifactId>
+			<version>${sqldatabase.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>

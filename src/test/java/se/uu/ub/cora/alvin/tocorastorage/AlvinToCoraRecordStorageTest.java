@@ -30,20 +30,23 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
+import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class AlvinToCoraRecordStorageTest {
 	private AlvinToCoraRecordStorage alvinToCoraRecordStorage;
 	private HttpHandlerFactorySpy httpHandlerFactory;
 	private AlvinToCoraConverterFactorySpy converterFactory;
 	private String baseURL = "http://alvin-cora-fedora:8088/fedora/";
+	private RecordReaderFactory recordReaderFactory;
 
 	@BeforeMethod
 	public void BeforeMethod() {
 		httpHandlerFactory = new HttpHandlerFactorySpy();
 		converterFactory = new AlvinToCoraConverterFactorySpy();
+		recordReaderFactory = new RecordReaderFactorySpy();
 		alvinToCoraRecordStorage = AlvinToCoraRecordStorage
-				.usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(httpHandlerFactory,
-						converterFactory, baseURL);
+				.usingHttpHandlerAndRecordReaderAndConverterFactoryAndFedoraBaseURL(httpHandlerFactory,
+						recordReaderFactory, converterFactory, baseURL);
 	}
 
 	@Test

@@ -28,6 +28,7 @@ import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
+import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public final class AlvinToCoraRecordStorage implements RecordStorage {
 
@@ -43,9 +44,9 @@ public final class AlvinToCoraRecordStorage implements RecordStorage {
 		this.baseURL = baseURL;
 	}
 
-	public static AlvinToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(
-			HttpHandlerFactory httpHandlerFactory, AlvinToCoraConverterFactory converterFactory,
-			String baseURL) {
+	public static AlvinToCoraRecordStorage usingHttpHandlerAndRecordReaderAndConverterFactoryAndFedoraBaseURL(
+			HttpHandlerFactory httpHandlerFactory, RecordReaderFactory recordReaderFactory,
+			AlvinToCoraConverterFactory converterFactory, String baseURL) {
 		return new AlvinToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL);
 	}
 
