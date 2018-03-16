@@ -1,14 +1,18 @@
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.db;
 
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class RecordReaderFactorySpy implements RecordReaderFactory {
 
+	public boolean factorWasCalled = false;
+	public RecordReader factored;
+
 	@Override
 	public RecordReader factor() {
-		// TODO Auto-generated method stub
-		return null;
+		factorWasCalled = true;
+		factored = new RecordReaderSpy();
+		return factored;
 	}
 
 }

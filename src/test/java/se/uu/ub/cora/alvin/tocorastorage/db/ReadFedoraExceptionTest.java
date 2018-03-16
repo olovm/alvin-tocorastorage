@@ -16,13 +16,13 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.db;
 
 import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.alvin.tocorastorage.ReadFedoraException;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.ReadFedoraException;
 
 public class ReadFedoraExceptionTest {
 	@Test

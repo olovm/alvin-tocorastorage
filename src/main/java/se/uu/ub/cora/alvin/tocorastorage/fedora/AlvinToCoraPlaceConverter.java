@@ -16,8 +16,9 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
+import se.uu.ub.cora.alvin.tocorastorage.ParseException;
 import se.uu.ub.cora.bookkeeper.data.DataAtomic;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 

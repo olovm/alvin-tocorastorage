@@ -16,25 +16,18 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-import java.util.ArrayList;
-import java.util.List;
+import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 
-import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraConverter;
-import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraConverterFactory;
-
-public class AlvinToCoraConverterFactorySpy implements AlvinToCoraConverterFactory {
-
-	List<AlvinToCoraConverter> factoredConverters = new ArrayList<>();
-	List<String> factoredTypes = new ArrayList<>();
+public class AlvinToCoraConverterFactoryImp implements AlvinToCoraConverterFactory {
 
 	@Override
 	public AlvinToCoraConverter factor(String type) {
-		factoredTypes.add(type);
-		AlvinToCoraConverter converter = new AlvinToCoraConverterSpy();
-		factoredConverters.add(converter);
-		return converter;
+		if ("place".equals(type)) {
+			return new AlvinToCoraPlaceConverter();
+		}
+		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}
 
 }

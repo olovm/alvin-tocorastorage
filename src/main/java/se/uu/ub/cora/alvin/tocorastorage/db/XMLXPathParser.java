@@ -1,4 +1,4 @@
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.db;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -19,6 +19,8 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import se.uu.ub.cora.alvin.tocorastorage.ParseException;
 
 public final class XMLXPathParser {
 	private Document document;

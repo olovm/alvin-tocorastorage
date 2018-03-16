@@ -16,16 +16,12 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-public class AlvinToCoraConverterFactoryImp implements AlvinToCoraConverterFactory {
+import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
-	@Override
-	public AlvinToCoraConverter factor(String type) {
-		if ("place".equals(type)) {
-			return new AlvinToCoraPlaceConverter();
-		}
-		throw NotImplementedException.withMessage("No converter implemented for: " + type);
-	}
+public interface AlvinToCoraConverter {
+
+	DataGroup fromXML(String xml);
 
 }

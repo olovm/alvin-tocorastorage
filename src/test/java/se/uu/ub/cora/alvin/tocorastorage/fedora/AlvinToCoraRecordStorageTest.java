@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -28,16 +28,18 @@ import java.util.Iterator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraRecordStorage;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.ReadFedoraException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public class AlvinToCoraRecordStorageTest {
 	private AlvinToCoraRecordStorage alvinToCoraRecordStorage;
 	private HttpHandlerFactorySpy httpHandlerFactory;
 	private AlvinToCoraConverterFactorySpy converterFactory;
 	private String baseURL = "http://alvin-cora-fedora:8088/fedora/";
-	private RecordReaderFactory recordReaderFactory;
+	private RecordReaderFactorySpy recordReaderFactory;
 
 	@BeforeMethod
 	public void BeforeMethod() {
@@ -45,8 +47,8 @@ public class AlvinToCoraRecordStorageTest {
 		converterFactory = new AlvinToCoraConverterFactorySpy();
 		recordReaderFactory = new RecordReaderFactorySpy();
 		alvinToCoraRecordStorage = AlvinToCoraRecordStorage
-				.usingHttpHandlerAndRecordReaderAndConverterFactoryAndFedoraBaseURL(httpHandlerFactory,
-						recordReaderFactory, converterFactory, baseURL);
+				.usingHttpHandlerAndRecordReaderAndConverterFactoryAndFedoraBaseURL(
+						httpHandlerFactory, recordReaderFactory, converterFactory, baseURL);
 	}
 
 	@Test
@@ -169,6 +171,15 @@ public class AlvinToCoraRecordStorageTest {
 				+ "  </objectFields>\n" + "  <objectFields>\n"
 				+ "      <pid>alvin-place:1684</pid>\n" + "  </objectFields>\n"
 				+ "  </resultList>\n" + "</result>";
+	}
+
+	@Test
+	public void testReadCountryList() throws Exception {
+		Collection<DataGroup> readCountryList = alvinToCoraRecordStorage.readList("country",
+				DataGroup.withNameInData("filter"));
+		assertTrue(recordReaderFactory.factorWasCalled);
+		RecordReaderSpy recordReader = (RecordReaderSpy) recordReaderFactory.factored;
+		assertEquals(recordReader.usedTableName, "country");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

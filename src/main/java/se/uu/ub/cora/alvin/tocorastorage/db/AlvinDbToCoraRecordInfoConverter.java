@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.db;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -24,16 +24,16 @@ import org.w3c.dom.NodeList;
 import se.uu.ub.cora.bookkeeper.data.DataAtomic;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
-public class AlvinToCoraRecordInfoConverter {
+public class AlvinDbToCoraRecordInfoConverter {
 	private XMLXPathParser parser;
 	private DataGroup recordInfo;
 
-	public AlvinToCoraRecordInfoConverter(XMLXPathParser parser) {
+	public AlvinDbToCoraRecordInfoConverter(XMLXPathParser parser) {
 		this.parser = parser;
 	}
 
 	public static DataGroup createRecordInfo(XMLXPathParser parser) {
-		AlvinToCoraRecordInfoConverter alvinToCoraRecordInfoConverter = new AlvinToCoraRecordInfoConverter(
+		AlvinDbToCoraRecordInfoConverter alvinToCoraRecordInfoConverter = new AlvinDbToCoraRecordInfoConverter(
 				parser);
 		return alvinToCoraRecordInfoConverter.createRecordInfoAsDataGroup();
 	}

@@ -16,38 +16,40 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
+import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
+import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
-public final class AlvinToCoraRecordStorage implements RecordStorage {
+public final class AlvinDbToCoraRecordStorage implements RecordStorage {
 
+	private static final String COUNTRY = "country";
 	private static final String PLACE = "place";
 	private HttpHandlerFactory httpHandlerFactory;
 	private String baseURL;
-	private AlvinToCoraConverterFactory converterFactory;
+	private AlvinDbToCoraConverterFactory converterFactory;
+	private RecordReaderFactory recordReaderFactory;
 
-	private AlvinToCoraRecordStorage(HttpHandlerFactory httpHandlerFactory,
-			AlvinToCoraConverterFactory converterFactory, String baseURL) {
-		this.httpHandlerFactory = httpHandlerFactory;
+	private AlvinDbToCoraRecordStorage(RecordReaderFactory recordReaderFactory,
+			AlvinDbToCoraConverterFactory converterFactory) {
+		this.recordReaderFactory = recordReaderFactory;
 		this.converterFactory = converterFactory;
-		this.baseURL = baseURL;
 	}
 
-	public static AlvinToCoraRecordStorage usingHttpHandlerAndRecordReaderAndConverterFactoryAndFedoraBaseURL(
-			HttpHandlerFactory httpHandlerFactory, RecordReaderFactory recordReaderFactory,
-			AlvinToCoraConverterFactory converterFactory, String baseURL) {
-		return new AlvinToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL);
+	public static AlvinDbToCoraRecordStorage usingRecordReaderFactoryAndConverterFactory(
+			RecordReaderFactory recordReaderFactory,
+			AlvinDbToCoraConverterFactory converterFactory) {
+		return new AlvinDbToCoraRecordStorage(recordReaderFactory, converterFactory);
 	}
 
 	@Override
@@ -60,7 +62,7 @@ public final class AlvinToCoraRecordStorage implements RecordStorage {
 
 	private DataGroup readAndConvertPlaceFromFedora(String id) {
 		HttpHandler httpHandler = createHttpHandlerForPlace(id);
-		AlvinToCoraConverter toCoraConverter = converterFactory.factor(PLACE);
+		AlvinDbToCoraConverter toCoraConverter = converterFactory.factor(PLACE);
 		return toCoraConverter.fromXML(httpHandler.getResponseText());
 	}
 
@@ -95,54 +97,16 @@ public final class AlvinToCoraRecordStorage implements RecordStorage {
 
 	@Override
 	public Collection<DataGroup> readList(String type, DataGroup filter) {
-		if (PLACE.equals(type)) {
-			return readAndConvertPlaceListFromFedora();
+		if (COUNTRY.equals(type)) {
+			RecordReader recordReader = recordReaderFactory.factor();
+			List<Map<String, String>> readAllFromTable = recordReader.readAllFromTable(type);
+			AlvinDbToCoraConverter dbToCoraConverter = converterFactory.factor(COUNTRY);
+			DataGroup convertedGroup = dbToCoraConverter.fromMap(readAllFromTable.get(0));
+			List<DataGroup> convertedList = new ArrayList<>();
+			convertedList.add(convertedGroup);
+			return convertedList;
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
-	}
-
-	private Collection<DataGroup> readAndConvertPlaceListFromFedora() {
-		try {
-			return tryReadAndConvertPlaceListFromFedora();
-		} catch (Exception e) {
-			throw ReadFedoraException
-					.withMessageAndException("Unable to read list of places: " + e.getMessage(), e);
-		}
-	}
-
-	private Collection<DataGroup> tryReadAndConvertPlaceListFromFedora() {
-		String placeListXML = getPlaceListXMLFromFedora();
-		NodeList list = extractNodeListWithPidsFromXML(placeListXML);
-		return constructCollectionOfPlacesFromFedora(list);
-	}
-
-	private String getPlaceListXMLFromFedora() {
-		HttpHandler httpHandler = createHttpHandlerForPlaceList();
-		return httpHandler.getResponseText();
-	}
-
-	private HttpHandler createHttpHandlerForPlaceList() {
-		String url = baseURL
-				+ "objects?pid=true&maxResults=100&resultFormat=xml&query=pid%7Ealvin-place:*";
-		HttpHandler httpHandler = httpHandlerFactory.factor(url);
-		httpHandler.setRequestMethod("GET");
-		return httpHandler;
-	}
-
-	private NodeList extractNodeListWithPidsFromXML(String placeListXML) {
-		XMLXPathParser parser = XMLXPathParser.forXML(placeListXML);
-		return parser
-				.getNodeListFromDocumentUsingXPath("/result/resultList/objectFields/pid/text()");
-	}
-
-	private Collection<DataGroup> constructCollectionOfPlacesFromFedora(NodeList list) {
-		Collection<DataGroup> placeList = new ArrayList<>();
-		for (int i = 0; i < list.getLength(); i++) {
-			Node node = list.item(i);
-			String pid = node.getTextContent();
-			placeList.add(readAndConvertPlaceFromFedora(pid));
-		}
-		return placeList;
 	}
 
 	@Override
