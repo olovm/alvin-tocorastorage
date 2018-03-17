@@ -24,8 +24,8 @@ public class AlvinDbToCoraConverterFactoryImp implements AlvinDbToCoraConverterF
 
 	@Override
 	public AlvinDbToCoraConverter factor(String type) {
-		if ("place".equals(type)) {
-			return new AlvinDbToCoraPlaceConverter();
+		if ("country".equals(type)) {
+			return new AlvinDbToCoraCountryConverter();
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}

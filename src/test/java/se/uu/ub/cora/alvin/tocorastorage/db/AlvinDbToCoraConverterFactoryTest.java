@@ -24,28 +24,24 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraConverter;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraConverterFactory;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraConverterFactoryImp;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraPlaceConverter;
 
 public class AlvinDbToCoraConverterFactoryTest {
-	private AlvinToCoraConverterFactory alvinToCoraConverterFactoryImp;
+	private AlvinDbToCoraConverterFactory alvinDbToCoraConverterFactoryImp;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		alvinToCoraConverterFactoryImp = new AlvinToCoraConverterFactoryImp();
+		alvinDbToCoraConverterFactoryImp = new AlvinDbToCoraConverterFactoryImp();
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "No converter implemented for: someType")
 	public void factorUnknownTypeThrowsException() throws Exception {
-		alvinToCoraConverterFactoryImp.factor("someType");
+		alvinDbToCoraConverterFactoryImp.factor("someType");
 	}
 
 	@Test
 	public void testFactoryPlace() throws Exception {
-		AlvinToCoraConverter converter = alvinToCoraConverterFactoryImp.factor("place");
-		assertTrue(converter instanceof AlvinToCoraPlaceConverter);
+		AlvinDbToCoraConverter converter = alvinDbToCoraConverterFactoryImp.factor("country");
+		assertTrue(converter instanceof AlvinDbToCoraCountryConverter);
 	}
 }
