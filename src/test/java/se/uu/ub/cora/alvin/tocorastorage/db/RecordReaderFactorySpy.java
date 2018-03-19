@@ -6,12 +6,14 @@ import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 public class RecordReaderFactorySpy implements RecordReaderFactory {
 
 	public boolean factorWasCalled = false;
-	public RecordReader factored;
+	public RecordReaderSpy factored;
+	public int noOfRecordsToReturn = 1;
 
 	@Override
 	public RecordReader factor() {
 		factorWasCalled = true;
 		factored = new RecordReaderSpy();
+		factored.noOfRecordsToReturn = noOfRecordsToReturn;
 		return factored;
 	}
 

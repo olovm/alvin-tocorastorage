@@ -22,8 +22,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -59,6 +59,55 @@ public class AlvinDbToCoraRecordStorageTest {
 			+ "read is not implemented for type: null")
 	public void readThrowsNotImplementedException() throws Exception {
 		alvinToCoraRecordStorage.read(null, null);
+	}
+
+	@Test
+	public void testReadCountryFactorDbReader() throws Exception {
+		alvinToCoraRecordStorage.read("country", "someId");
+		assertTrue(recordReaderFactory.factorWasCalled);
+	}
+
+	@Test
+	public void testReadCountryCountryTableRequestedFromReader() throws Exception {
+		alvinToCoraRecordStorage.read("country", "someId");
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
+		assertEquals(recordReader.usedTableName, "country");
+	}
+
+	@Test
+	public void testReadCountryConditionsForCountryTable() throws Exception {
+		alvinToCoraRecordStorage.read("country", "someId");
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
+		Map<String, String> conditions = recordReader.usedConditions;
+		assertEquals(conditions.get("alpha2code"), "someId");
+	}
+
+	@Test
+	public void testReadCountryConverterIsFactored() throws Exception {
+		alvinToCoraRecordStorage.read("country", "someId");
+		AlvinDbToCoraConverter alvinDbToCoraConverter = converterFactory.factoredConverters.get(0);
+		assertNotNull(alvinDbToCoraConverter);
+	}
+
+	@Test
+	public void testReadCountryConverterIsCalledWithDataFromDbStorage() throws Exception {
+		alvinToCoraRecordStorage.read("country", "someId");
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
+		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
+				.get(0);
+		assertNotNull(alvinDbToCoraConverter.mapToConvert);
+		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
+	}
+
+	@Test
+	public void testReadCountryCallsDatabaseAndReturnsConvertedResult() throws Exception {
+		DataGroup readCountry = alvinToCoraRecordStorage.read("country", "someId");
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
+		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
+				.get(0);
+		assertEquals(recordReader.returnedList.size(), 1);
+		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
+		assertEquals(readCountry, alvinDbToCoraConverter.convertedDbDataGroup);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -100,7 +149,7 @@ public class AlvinDbToCoraRecordStorageTest {
 	@Test
 	public void testReadCountryListCountryTableRequestedFromReader() throws Exception {
 		alvinToCoraRecordStorage.readList("country", DataGroup.withNameInData("filter"));
-		RecordReaderSpy recordReader = (RecordReaderSpy) recordReaderFactory.factored;
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		assertEquals(recordReader.usedTableName, "country");
 	}
 
@@ -113,9 +162,8 @@ public class AlvinDbToCoraRecordStorageTest {
 
 	@Test
 	public void testReadCountryListConverterIsCalledWithDataFromDbStorage() throws Exception {
-		Collection<DataGroup> readCountryList = alvinToCoraRecordStorage.readList("country",
-				DataGroup.withNameInData("filter"));
-		RecordReaderSpy recordReader = (RecordReaderSpy) recordReaderFactory.factored;
+		alvinToCoraRecordStorage.readList("country", DataGroup.withNameInData("filter"));
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
 				.get(0);
 		assertNotNull(alvinDbToCoraConverter.mapToConvert);
@@ -126,12 +174,38 @@ public class AlvinDbToCoraRecordStorageTest {
 	public void testReadCountryListConverteredIsAddedToList() throws Exception {
 		List<DataGroup> readCountryList = (List<DataGroup>) alvinToCoraRecordStorage
 				.readList("country", DataGroup.withNameInData("filter"));
-		RecordReaderSpy recordReader = (RecordReaderSpy) recordReaderFactory.factored;
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
 				.get(0);
-		assertNotNull(alvinDbToCoraConverter.mapToConvert);
+		assertEquals(recordReader.returnedList.size(), 1);
 		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
 		assertEquals(readCountryList.get(0), alvinDbToCoraConverter.convertedDbDataGroup);
+	}
+
+	@Test
+	public void testReadCountryListConverteredMoreThanOneIsAddedToList() throws Exception {
+		recordReaderFactory.noOfRecordsToReturn = 3;
+		List<DataGroup> readCountryList = (List<DataGroup>) alvinToCoraRecordStorage
+				.readList("country", DataGroup.withNameInData("filter"));
+		RecordReaderSpy recordReader = recordReaderFactory.factored;
+
+		assertEquals(recordReader.returnedList.size(), 3);
+
+		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
+				.get(0);
+		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
+		assertEquals(readCountryList.get(0), alvinDbToCoraConverter.convertedDbDataGroup);
+
+		AlvinDbToCoraConverterSpy alvinDbToCoraConverter2 = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
+				.get(1);
+		assertEquals(recordReader.returnedList.get(1), alvinDbToCoraConverter2.mapToConvert);
+		assertEquals(readCountryList.get(1), alvinDbToCoraConverter2.convertedDbDataGroup);
+
+		AlvinDbToCoraConverterSpy alvinDbToCoraConverter3 = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
+				.get(2);
+		assertEquals(recordReader.returnedList.get(2), alvinDbToCoraConverter3.mapToConvert);
+		assertEquals(readCountryList.get(2), alvinDbToCoraConverter3.convertedDbDataGroup);
+
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

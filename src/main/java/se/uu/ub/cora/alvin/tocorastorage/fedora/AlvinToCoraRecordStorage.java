@@ -29,32 +29,25 @@ import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
-import se.uu.ub.cora.sqldatabase.RecordReader;
-import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 
 public final class AlvinToCoraRecordStorage implements RecordStorage {
 
-	private static final String COUNTRY = "country";
 	private static final String PLACE = "place";
 	private HttpHandlerFactory httpHandlerFactory;
 	private String baseURL;
 	private AlvinToCoraConverterFactory converterFactory;
-	private RecordReaderFactory recordReaderFactory;
 
 	private AlvinToCoraRecordStorage(HttpHandlerFactory httpHandlerFactory,
-			RecordReaderFactory recordReaderFactory, AlvinToCoraConverterFactory converterFactory,
-			String baseURL) {
+			AlvinToCoraConverterFactory converterFactory, String baseURL) {
 		this.httpHandlerFactory = httpHandlerFactory;
-		this.recordReaderFactory = recordReaderFactory;
 		this.converterFactory = converterFactory;
 		this.baseURL = baseURL;
 	}
 
 	public static AlvinToCoraRecordStorage usingHttpHandlerAndRecordReaderAndConverterFactoryAndFedoraBaseURL(
-			HttpHandlerFactory httpHandlerFactory, RecordReaderFactory recordReaderFactory,
-			AlvinToCoraConverterFactory converterFactory, String baseURL) {
-		return new AlvinToCoraRecordStorage(httpHandlerFactory, recordReaderFactory,
-				converterFactory, baseURL);
+			HttpHandlerFactory httpHandlerFactory, AlvinToCoraConverterFactory converterFactory,
+			String baseURL) {
+		return new AlvinToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL);
 	}
 
 	@Override
@@ -104,11 +97,6 @@ public final class AlvinToCoraRecordStorage implements RecordStorage {
 	public Collection<DataGroup> readList(String type, DataGroup filter) {
 		if (PLACE.equals(type)) {
 			return readAndConvertPlaceListFromFedora();
-		}
-		if (COUNTRY.equals(type)) {
-			RecordReader recordReader = recordReaderFactory.factor();
-			recordReader.readAllFromTable(type);
-			return null;
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
 	}
