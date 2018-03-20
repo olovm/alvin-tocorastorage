@@ -20,13 +20,12 @@ package se.uu.ub.cora.alvin.tocorastorage.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
-import se.uu.ub.cora.httphandler.HttpHandler;
-import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
@@ -34,9 +33,6 @@ import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
 public final class AlvinDbToCoraRecordStorage implements RecordStorage {
 
 	private static final String COUNTRY = "country";
-	private static final String PLACE = "place";
-	private HttpHandlerFactory httpHandlerFactory;
-	private String baseURL;
 	private AlvinDbToCoraConverterFactory converterFactory;
 	private RecordReaderFactory recordReaderFactory;
 
@@ -54,23 +50,22 @@ public final class AlvinDbToCoraRecordStorage implements RecordStorage {
 
 	@Override
 	public DataGroup read(String type, String id) {
-		if (PLACE.equals(type)) {
-			return readAndConvertPlaceFromFedora(id);
+		if (COUNTRY.equals(type)) {
+			return readAndConvertCountryFromDb(type, id);
 		}
 		throw NotImplementedException.withMessage("read is not implemented for type: " + type);
 	}
 
-	private DataGroup readAndConvertPlaceFromFedora(String id) {
-		HttpHandler httpHandler = createHttpHandlerForPlace(id);
-		AlvinDbToCoraConverter toCoraConverter = converterFactory.factor(PLACE);
-		return toCoraConverter.fromXML(httpHandler.getResponseText());
+	private DataGroup readAndConvertCountryFromDb(String type, String id) {
+		Map<String, String> readRow = readOneCountryFromDbUsingTypeAndId(type, id);
+		return convertOneMapFromDbToDataGroup(type, readRow);
 	}
 
-	private HttpHandler createHttpHandlerForPlace(String id) {
-		String url = baseURL + "objects/" + id + "/datastreams/METADATA/content";
-		HttpHandler httpHandler = httpHandlerFactory.factor(url);
-		httpHandler.setRequestMethod("GET");
-		return httpHandler;
+	private Map<String, String> readOneCountryFromDbUsingTypeAndId(String type, String id) {
+		RecordReader recordReader = recordReaderFactory.factor();
+		Map<String, String> conditions = new HashMap<>();
+		conditions.put("alpha2code", id);
+		return recordReader.readOneFromDbUsingTableAndConditions(type, conditions);
 	}
 
 	@Override
@@ -98,15 +93,34 @@ public final class AlvinDbToCoraRecordStorage implements RecordStorage {
 	@Override
 	public Collection<DataGroup> readList(String type, DataGroup filter) {
 		if (COUNTRY.equals(type)) {
-			RecordReader recordReader = recordReaderFactory.factor();
-			List<Map<String, String>> readAllFromTable = recordReader.readAllFromTable(type);
-			AlvinDbToCoraConverter dbToCoraConverter = converterFactory.factor(COUNTRY);
-			DataGroup convertedGroup = dbToCoraConverter.fromMap(readAllFromTable.get(0));
-			List<DataGroup> convertedList = new ArrayList<>();
-			convertedList.add(convertedGroup);
-			return convertedList;
+			return readAllFromDbAndConvertToDataGroup(type);
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
+	}
+
+	private Collection<DataGroup> readAllFromDbAndConvertToDataGroup(String type) {
+		List<Map<String, String>> readAllFromTable = readAllFromDb(type);
+		return convertListOfMapsFromDbToDataGroups(type, readAllFromTable);
+	}
+
+	private List<Map<String, String>> readAllFromDb(String type) {
+		RecordReader recordReader = recordReaderFactory.factor();
+		return recordReader.readAllFromTable(type);
+	}
+
+	private List<DataGroup> convertListOfMapsFromDbToDataGroups(String type,
+			List<Map<String, String>> readAllFromTable) {
+		List<DataGroup> convertedList = new ArrayList<>();
+		for (Map<String, String> map : readAllFromTable) {
+			DataGroup convertedGroup = convertOneMapFromDbToDataGroup(type, map);
+			convertedList.add(convertedGroup);
+		}
+		return convertedList;
+	}
+
+	private DataGroup convertOneMapFromDbToDataGroup(String type, Map<String, String> map) {
+		AlvinDbToCoraConverter dbToCoraConverter = converterFactory.factor(type);
+		return dbToCoraConverter.fromMap(map);
 	}
 
 	@Override

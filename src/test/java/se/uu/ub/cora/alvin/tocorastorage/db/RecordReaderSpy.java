@@ -11,15 +11,32 @@ public class RecordReaderSpy implements RecordReader {
 
 	public String usedTableName = "";
 	public List<Map<String, String>> returnedList;
+	public int noOfRecordsToReturn = 1;
+	public Map<String, String> usedConditions = new HashMap<>();
 
 	@Override
 	public List<Map<String, String>> readAllFromTable(String tableName) {
 		usedTableName = tableName;
 		returnedList = new ArrayList<>();
+		for (int i = 0; i < noOfRecordsToReturn; i++) {
+			Map<String, String> map = new HashMap<>();
+			map.put("someKey" + i, "someValue" + i);
+			returnedList.add(map);
+		}
+		return returnedList;
+	}
+
+	@Override
+	public Map<String, String> readOneFromDbUsingTableAndConditions(String tableName,
+			Map<String, String> conditions) {
+		usedTableName = tableName;
+		usedConditions = conditions;
 		Map<String, String> map = new HashMap<>();
 		map.put("someKey", "someValue");
+		returnedList = new ArrayList<>();
 		returnedList.add(map);
-		return returnedList;
+		return map;
+
 	}
 
 }
