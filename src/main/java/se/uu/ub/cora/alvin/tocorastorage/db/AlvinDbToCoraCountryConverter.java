@@ -30,17 +30,8 @@ public class AlvinDbToCoraCountryConverter implements AlvinDbToCoraConverter {
 		String alpha2 = map.get(ALPHA2CODE);
 		DataAtomic isoAlpha2 = DataAtomic.withNameInDataAndValue(ALPHA2CODE, alpha2);
 		country.addChild(isoAlpha2);
-		// TODO: loopa värden eller plocka ut de vi vet att vi vill ha?
-		// for (Entry<String, String> entry : map.entrySet()) {
-		// checkNonEmptyValue(entry);
-		// DataAtomic dataAtomicChild =
-		// DataAtomic.withNameInDataAndValue(entry.getKey(),
-		// entry.getValue());
-		// country.addChild(dataAtomicChild);
-		// }
 		DataGroup text = createText(alpha2);
 		country.addChild(text);
-		// TODO: ska vi i detta läge skapa texten??
 		return country;
 	}
 

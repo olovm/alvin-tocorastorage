@@ -95,7 +95,7 @@ public class AlvinDbToCoraCountryConverterTest {
 		Map<String, String> rowFromDb = new HashMap<>();
 		rowFromDb.put("alpha2code", "SE");
 		rowFromDb.put("defaultName", "Sverige");
-		// rowFromDb.put("alpha3code", "SWE");
+		rowFromDb.put("alpha3code", "SWE");
 		// rowFromDb.put("numericalcode", "752");
 		DataGroup country = converter.fromMap(rowFromDb);
 
