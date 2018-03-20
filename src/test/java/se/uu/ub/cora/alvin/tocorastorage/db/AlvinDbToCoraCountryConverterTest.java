@@ -15,15 +15,20 @@ import se.uu.ub.cora.bookkeeper.data.DataGroup;
 public class AlvinDbToCoraCountryConverterTest {
 
 	private AlvinDbToCoraCountryConverter converter;
+	private Map<String, String> rowFromDb;
 
 	@BeforeMethod
 	public void beforeMethod() {
+		rowFromDb = new HashMap<>();
+		rowFromDb.put("alpha2code", "someAlpha2Code");
+		rowFromDb.put("lastupdated", "2014-04-17 10:12:48.8");
 		converter = new AlvinDbToCoraCountryConverter();
 	}
 
-	@Test
+	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
+			+ "Error converting country to Cora country: Map does not contain value for alpha2code")
 	public void testEmptyMap() {
-		Map<String, String> rowFromDb = new HashMap<>();
+		rowFromDb = new HashMap<>();
 		DataGroup country = converter.fromMap(rowFromDb);
 		assertNull(country);
 	}
@@ -31,9 +36,8 @@ public class AlvinDbToCoraCountryConverterTest {
 	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error converting country to Cora country: Map does not contain value for alpha2code")
 	public void testMapWithEmptyValueThrowsError() {
-		Map<String, String> rowFromDb = new HashMap<>();
+		rowFromDb = new HashMap<>();
 		rowFromDb.put("alpha2code", "");
-		rowFromDb.put("defaultName", "Sverige");
 		converter.fromMap(rowFromDb);
 	}
 
@@ -43,38 +47,43 @@ public class AlvinDbToCoraCountryConverterTest {
 		Map<String, String> rowFromDb = new HashMap<>();
 		rowFromDb.put("alpha3code", "SWE");
 		rowFromDb.put("alpha2code", "");
-		rowFromDb.put("defaultName", "Sverige");
 		converter.fromMap(rowFromDb);
 	}
 
-	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = "Error converting country to Cora country: Map does not contain value for alpha2code")
+	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = ""
+			+ "Error converting country to Cora country: Map does not contain value for alpha2code")
 	public void mapDoesNotContainAlpha2Value() {
-		Map<String, String> rowFromDb = new HashMap<>();
-		rowFromDb.put("defaultName", "Sverige");
-		DataGroup country = converter.fromMap(rowFromDb);
-		assertEquals(country.getNameInData(), "country");
-
-	}
-
-	@Test(expectedExceptions = ConversionException.class, expectedExceptionsMessageRegExp = "Error converting country to Cora country: Map does not contain value for defaultName")
-	public void mapDoesNotContainDefaultNameValue() {
-		Map<String, String> rowFromDb = new HashMap<>();
-		rowFromDb.put("alpha2code", "someAlpha2Code");
+		rowFromDb = new HashMap<>();
+		rowFromDb.put("alpha3code", "SWE");
 		DataGroup country = converter.fromMap(rowFromDb);
 		assertEquals(country.getNameInData(), "country");
 
 	}
 
 	@Test
-	public void testMapContainsValueReturnsDataGroupWithCorrectRecordInfo() {
-		Map<String, String> rowFromDb = new HashMap<>();
-		rowFromDb.put("alpha2code", "someAlpha2Code");
-		rowFromDb.put("defaultName", "Sverige");
+	public void testMinimalValuesReturnsDataGroupWithCorrectRecordInfo() {
+		rowFromDb.put("defaultname", "");
+		rowFromDb.put("alpha3code", "");
+		rowFromDb.put("numericalcode", "");
 		DataGroup country = converter.fromMap(rowFromDb);
 		assertEquals(country.getNameInData(), "country");
 
 		assertCorrectRecordInfoWithId(country, "someAlpha2Code");
+		assertEquals(country.getFirstAtomicValueWithNameInData("iso31661Alpha2"), "someAlpha2Code");
+		assertEquals(country.getChildren().size(), 2);
+	}
 
+	@Test
+	public void testMinimalNullValuesReturnsDataGroupWithCorrectRecordInfo() {
+		rowFromDb.put("defaultname", null);
+		rowFromDb.put("alpha3code", null);
+		rowFromDb.put("numericalcode", null);
+		DataGroup country = converter.fromMap(rowFromDb);
+		assertEquals(country.getNameInData(), "country");
+
+		assertCorrectRecordInfoWithId(country, "someAlpha2Code");
+		assertEquals(country.getFirstAtomicValueWithNameInData("iso31661Alpha2"), "someAlpha2Code");
+		assertEquals(country.getChildren().size(), 2);
 	}
 
 	private void assertCorrectRecordInfoWithId(DataGroup country, String id) {
@@ -88,25 +97,43 @@ public class AlvinDbToCoraCountryConverterTest {
 		DataGroup dataDivider = recordInfo.getFirstGroupWithNameInData("dataDivider");
 		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordType"), "system");
 		assertEquals(dataDivider.getFirstAtomicValueWithNameInData("linkedRecordId"), "alvin");
+
+		String tsCreated = recordInfo.getFirstAtomicValueWithNameInData("tsCreated");
+		assertEquals(tsCreated, "2014-04-17 10:12:48.8");
+		String tsUpdated = recordInfo.getFirstAtomicValueWithNameInData("tsUpdated");
+		assertEquals(tsUpdated, "2014-04-17 10:12:48.8");
+
+		assertCorrectUserInfo(recordInfo);
+
+	}
+
+	private void assertCorrectUserInfo(DataGroup recordInfo) {
+		DataGroup createdBy = recordInfo.getFirstGroupWithNameInData("createdBy");
+		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"),
+				"systemOneUser");
+		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
+		DataGroup updatedBy = recordInfo.getFirstGroupWithNameInData("updatedBy");
+		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"),
+				"systemOneUser");
+		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
 	}
 
 	@Test
 	public void testMapContainsValueReturnsDataGroupWithCorrectChildren() {
-		Map<String, String> rowFromDb = new HashMap<>();
-		rowFromDb.put("alpha2code", "SE");
-		rowFromDb.put("defaultName", "Sverige");
+		rowFromDb.put("defaultname", "Sverige");
 		rowFromDb.put("alpha3code", "SWE");
-		// rowFromDb.put("numericalcode", "752");
+		rowFromDb.put("numericalcode", "752");
+		rowFromDb.put("marccode", "sw");
 		DataGroup country = converter.fromMap(rowFromDb);
 
-		assertEquals(country.getFirstAtomicValueWithNameInData("alpha2code"), "SE");
+		assertEquals(country.getFirstAtomicValueWithNameInData("iso31661Alpha2"), "someAlpha2Code");
 		DataGroup text = country.getFirstGroupWithNameInData("textId");
 		assertEquals(text.getFirstAtomicValueWithNameInData("linkedRecordType"), "coraText");
-		assertEquals(text.getFirstAtomicValueWithNameInData("linkedRecordId"), "countrySEText");
-		// assertEquals(country.getFirstAtomicValueWithNameInData("iso31661Alpha3"),
-		// "SWE");
-		// assertEquals(country.getFirstAtomicValueWithNameInData("iso31661Numeric"),
-		// "752");
+		assertEquals(text.getFirstAtomicValueWithNameInData("linkedRecordId"),
+				"countrysomeAlpha2CodeText");
+		assertEquals(country.getFirstAtomicValueWithNameInData("iso31661Alpha3"), "SWE");
+		assertEquals(country.getFirstAtomicValueWithNameInData("iso31661Numeric"), "752");
+		assertEquals(country.getFirstAtomicValueWithNameInData("marcCountryCode"), "sw");
 
 	}
 
