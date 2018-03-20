@@ -27,7 +27,7 @@ public class RecordReaderSpy implements RecordReader {
 	}
 
 	@Override
-	public Map<String, String> readOneFromDbUsingTableAndConditions(String tableName,
+	public Map<String, String> readOneRowFromDbUsingTableAndConditions(String tableName,
 			Map<String, String> conditions) {
 		usedTableName = tableName;
 		usedConditions = conditions;
