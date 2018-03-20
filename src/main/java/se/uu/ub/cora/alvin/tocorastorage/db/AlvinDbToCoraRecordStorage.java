@@ -57,15 +57,15 @@ public final class AlvinDbToCoraRecordStorage implements RecordStorage {
 	}
 
 	private DataGroup readAndConvertCountryFromDb(String type, String id) {
-		Map<String, String> readRow = readOneCountryFromDbUsingTypeAndId(type, id);
+		Map<String, String> readRow = readOneRowFromDbUsingTypeAndId(type, id);
 		return convertOneMapFromDbToDataGroup(type, readRow);
 	}
 
-	private Map<String, String> readOneCountryFromDbUsingTypeAndId(String type, String id) {
+	private Map<String, String> readOneRowFromDbUsingTypeAndId(String type, String id) {
 		RecordReader recordReader = recordReaderFactory.factor();
 		Map<String, String> conditions = new HashMap<>();
 		conditions.put("alpha2code", id);
-		return recordReader.readOneFromDbUsingTableAndConditions(type, conditions);
+		return recordReader.readOneRowFromDbUsingTableAndConditions(type, conditions);
 	}
 
 	@Override
