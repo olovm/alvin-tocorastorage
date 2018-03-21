@@ -24,10 +24,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.ParseException;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraPlaceConverter;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraPlaceConverter;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
-public class AlvinToCoraPlaceConverterTest {
+public class AlvinFedoraToCoraPlaceConverterTest {
 	String place22XML = "<place id=\"1\">\n" + "  <pid>alvin-place:22</pid>\n"
 			+ "  <dsId>METADATA</dsId>\n" + "  <recordInfo id=\"2\">\n"
 			+ "    <externalDs>false</externalDs>\n" + "    <lastAction>UPDATED</lastAction>\n"
@@ -137,11 +137,11 @@ public class AlvinToCoraPlaceConverterTest {
 			+ "        <organisationUnitId>2</organisationUnitId>\n"
 			+ "        <unique>false</unique>\n" + "      </type>\n" + "      <text>873</text>\n"
 			+ "    </localIdentifier>\n" + "  </localIdentifiers>\n" + "</place>\n" + "";
-	private AlvinToCoraPlaceConverter converter;
+	private AlvinFedoraToCoraPlaceConverter converter;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		converter = new AlvinToCoraPlaceConverter();
+		converter = new AlvinFedoraToCoraPlaceConverter();
 	}
 
 	@Test(expectedExceptions = ParseException.class, expectedExceptionsMessageRegExp = ""

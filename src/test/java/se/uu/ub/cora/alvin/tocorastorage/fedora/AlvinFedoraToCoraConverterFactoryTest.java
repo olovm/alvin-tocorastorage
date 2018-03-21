@@ -24,17 +24,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraConverter;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraConverterFactory;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraConverterFactoryImp;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraPlaceConverter;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverter;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverterFactory;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverterFactoryImp;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraPlaceConverter;
 
-public class AlvinToCoraConverterFactoryTest {
-	private AlvinToCoraConverterFactory alvinToCoraConverterFactoryImp;
+public class AlvinFedoraToCoraConverterFactoryTest {
+	private AlvinFedoraToCoraConverterFactory alvinToCoraConverterFactoryImp;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		alvinToCoraConverterFactoryImp = new AlvinToCoraConverterFactoryImp();
+		alvinToCoraConverterFactoryImp = new AlvinFedoraToCoraConverterFactoryImp();
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -45,7 +45,7 @@ public class AlvinToCoraConverterFactoryTest {
 
 	@Test
 	public void testFactoryPlace() throws Exception {
-		AlvinToCoraConverter converter = alvinToCoraConverterFactoryImp.factor("place");
-		assertTrue(converter instanceof AlvinToCoraPlaceConverter);
+		AlvinFedoraToCoraConverter converter = alvinToCoraConverterFactoryImp.factor("place");
+		assertTrue(converter instanceof AlvinFedoraToCoraPlaceConverter);
 	}
 }

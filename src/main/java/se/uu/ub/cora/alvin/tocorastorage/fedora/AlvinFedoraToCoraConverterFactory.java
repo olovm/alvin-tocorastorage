@@ -18,8 +18,8 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-public interface AlvinToCoraConverterFactory {
+public interface AlvinFedoraToCoraConverterFactory {
 
-	AlvinToCoraConverter factor(String type);
+	AlvinFedoraToCoraConverter factor(String type);
 
 }

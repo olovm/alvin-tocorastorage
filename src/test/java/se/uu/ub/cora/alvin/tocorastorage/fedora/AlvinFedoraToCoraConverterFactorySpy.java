@@ -18,16 +18,23 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class AlvinToCoraConverterFactoryImp implements AlvinToCoraConverterFactory {
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverter;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverterFactory;
+
+public class AlvinFedoraToCoraConverterFactorySpy implements AlvinFedoraToCoraConverterFactory {
+
+	List<AlvinFedoraToCoraConverter> factoredConverters = new ArrayList<>();
+	List<String> factoredTypes = new ArrayList<>();
 
 	@Override
-	public AlvinToCoraConverter factor(String type) {
-		if ("place".equals(type)) {
-			return new AlvinToCoraPlaceConverter();
-		}
-		throw NotImplementedException.withMessage("No converter implemented for: " + type);
+	public AlvinFedoraToCoraConverter factor(String type) {
+		factoredTypes.add(type);
+		AlvinFedoraToCoraConverter converter = new AlvinFedoraToCoraConverterSpy();
+		factoredConverters.add(converter);
+		return converter;
 	}
 
 }

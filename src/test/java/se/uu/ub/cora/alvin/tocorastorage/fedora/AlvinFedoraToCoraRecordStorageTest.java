@@ -32,19 +32,19 @@ import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 
-public class AlvinToCoraRecordStorageTest {
-	private AlvinToCoraRecordStorage alvinToCoraRecordStorage;
+public class AlvinFedoraToCoraRecordStorageTest {
+	private AlvinFedoraToCoraRecordStorage alvinToCoraRecordStorage;
 	private HttpHandlerFactorySpy httpHandlerFactory;
-	private AlvinToCoraConverterFactorySpy converterFactory;
+	private AlvinFedoraToCoraConverterFactorySpy converterFactory;
 	private String baseURL = "http://alvin-cora-fedora:8088/fedora/";
 
 	@BeforeMethod
 	public void BeforeMethod() {
 		httpHandlerFactory = new HttpHandlerFactorySpy();
-		converterFactory = new AlvinToCoraConverterFactorySpy();
-		alvinToCoraRecordStorage = AlvinToCoraRecordStorage
-				.usingHttpHandlerAndRecordReaderAndConverterFactoryAndFedoraBaseURL(
-						httpHandlerFactory, converterFactory, baseURL);
+		converterFactory = new AlvinFedoraToCoraConverterFactorySpy();
+		alvinToCoraRecordStorage = AlvinFedoraToCoraRecordStorage
+				.usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(httpHandlerFactory,
+						converterFactory, baseURL);
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class AlvinToCoraRecordStorageTest {
 
 		assertEquals(converterFactory.factoredConverters.size(), 1);
 		assertEquals(converterFactory.factoredTypes.get(0), "place");
-		AlvinToCoraConverterSpy alvinToCoraConverter = (AlvinToCoraConverterSpy) converterFactory.factoredConverters
+		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredConverters
 				.get(0);
 		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
 		assertEquals(readPlace, alvinToCoraConverter.convertedDataGroup);
@@ -147,7 +147,7 @@ public class AlvinToCoraRecordStorageTest {
 
 		assertEquals(converterFactory.factoredConverters.size(), 6);
 		assertEquals(converterFactory.factoredTypes.get(0), "place");
-		AlvinToCoraConverterSpy alvinToCoraConverter = (AlvinToCoraConverterSpy) converterFactory.factoredConverters
+		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredConverters
 				.get(0);
 		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
 		assertEquals(readPlaceList.size(), 6);

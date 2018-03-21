@@ -18,10 +18,16 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-import se.uu.ub.cora.bookkeeper.data.DataGroup;
+import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 
-public interface AlvinToCoraConverter {
+public class AlvinFedoraToCoraConverterFactoryImp implements AlvinFedoraToCoraConverterFactory {
 
-	DataGroup fromXML(String xml);
+	@Override
+	public AlvinFedoraToCoraConverter factor(String type) {
+		if ("place".equals(type)) {
+			return new AlvinFedoraToCoraPlaceConverter();
+		}
+		throw NotImplementedException.withMessage("No converter implemented for: " + type);
+	}
 
 }

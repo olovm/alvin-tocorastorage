@@ -18,23 +18,10 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-import java.util.ArrayList;
-import java.util.List;
+import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraConverter;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinToCoraConverterFactory;
+public interface AlvinFedoraToCoraConverter {
 
-public class AlvinToCoraConverterFactorySpy implements AlvinToCoraConverterFactory {
-
-	List<AlvinToCoraConverter> factoredConverters = new ArrayList<>();
-	List<String> factoredTypes = new ArrayList<>();
-
-	@Override
-	public AlvinToCoraConverter factor(String type) {
-		factoredTypes.add(type);
-		AlvinToCoraConverter converter = new AlvinToCoraConverterSpy();
-		factoredConverters.add(converter);
-		return converter;
-	}
+	DataGroup fromXML(String xml);
 
 }
