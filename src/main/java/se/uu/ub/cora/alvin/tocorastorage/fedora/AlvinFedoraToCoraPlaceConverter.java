@@ -44,7 +44,7 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		createDefaultNameAndAddToPlace(place);
 
 		createCoordinatesAndAddToPlace(place);
-		createCountryAndAddToPlace(place);
+		possiblyCreateCountryAndAddToPlace(place);
 		return place;
 	}
 
@@ -81,10 +81,20 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 				getStringFromDocumentUsingXPath("/place/longitude/text()")));
 	}
 
-	private void createCountryAndAddToPlace(DataGroup place) {
+	private void possiblyCreateCountryAndAddToPlace(DataGroup place) {
+		String alpha2Code = getStringFromDocumentUsingXPath("/place/country/alpha2Code/text()");
+		if (valueExists(alpha2Code)) {
+			createCountryAndAddToPlace(place, alpha2Code);
+		}
+	}
+
+	private boolean valueExists(String alpha2Code) {
+		return !"".equals(alpha2Code);
+	}
+
+	private void createCountryAndAddToPlace(DataGroup place, String alpha2Code) {
 		DataGroup country = DataGroup.withNameInData("country");
 		country.addChild(DataAtomic.withNameInDataAndValue("linkedRecordType", "country"));
-		String alpha2Code = getStringFromDocumentUsingXPath("/place/country/alpha2Code/text()");
 		country.addChild(DataAtomic.withNameInDataAndValue("linkedRecordId", alpha2Code));
 		place.addChild(country);
 	}
