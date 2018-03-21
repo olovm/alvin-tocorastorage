@@ -44,6 +44,7 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		createDefaultNameAndAddToPlace(place);
 
 		createCoordinatesAndAddToPlace(place);
+		createCountryAndAddToPlace(place);
 		return place;
 	}
 
@@ -79,4 +80,13 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		coordinates.addChild(DataAtomic.withNameInDataAndValue("longitude",
 				getStringFromDocumentUsingXPath("/place/longitude/text()")));
 	}
+
+	private void createCountryAndAddToPlace(DataGroup place) {
+		DataGroup country = DataGroup.withNameInData("country");
+		country.addChild(DataAtomic.withNameInDataAndValue("linkedRecordType", "country"));
+		String alpha2Code = getStringFromDocumentUsingXPath("/place/country/alpha2Code/text()");
+		country.addChild(DataAtomic.withNameInDataAndValue("linkedRecordId", alpha2Code));
+		place.addChild(country);
+	}
+
 }

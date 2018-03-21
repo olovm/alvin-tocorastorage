@@ -24,7 +24,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.ParseException;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraPlaceConverter;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
 public class AlvinFedoraToCoraPlaceConverterTest {
@@ -191,6 +190,10 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("latitude"), "58.42");
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("longitude"), "15.62");
 
+		DataGroup country = placeDataGroup.getFirstGroupWithNameInData("country");
+		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordType"), "country");
+		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordId"), "SE");
+
 	}
 
 	@Test
@@ -231,6 +234,10 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		DataGroup coordinates = placeDataGroup.getFirstGroupWithNameInData("coordinates");
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("latitude"), "55.7");
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("longitude"), "13.18");
+
+		DataGroup country = placeDataGroup.getFirstGroupWithNameInData("country");
+		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordType"), "country");
+		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordId"), "SE");
 
 	}
 }
