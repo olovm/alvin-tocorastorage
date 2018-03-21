@@ -16,10 +16,14 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.db;
 
-public interface AlvinToCoraConverterFactory {
+import java.util.Map;
 
-	AlvinToCoraConverter factor(String type);
+import se.uu.ub.cora.bookkeeper.data.DataGroup;
+
+public interface AlvinDbToCoraConverter {
+
+	DataGroup fromMap(Map<String, String> map);
 
 }

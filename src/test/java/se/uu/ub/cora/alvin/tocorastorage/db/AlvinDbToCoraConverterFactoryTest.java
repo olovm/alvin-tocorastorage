@@ -16,36 +16,32 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.db;
 
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraConverter;
-import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraConverterFactory;
-import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraConverterFactoryImp;
-import se.uu.ub.cora.alvin.tocorastorage.AlvinToCoraPlaceConverter;
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 
-public class AlvinToCoraConverterFactoryTest {
-	private AlvinToCoraConverterFactory alvinToCoraConverterFactoryImp;
+public class AlvinDbToCoraConverterFactoryTest {
+	private AlvinDbToCoraConverterFactory alvinDbToCoraConverterFactoryImp;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		alvinToCoraConverterFactoryImp = new AlvinToCoraConverterFactoryImp();
+		alvinDbToCoraConverterFactoryImp = new AlvinDbToCoraConverterFactoryImp();
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "No converter implemented for: someType")
 	public void factorUnknownTypeThrowsException() throws Exception {
-		alvinToCoraConverterFactoryImp.factor("someType");
+		alvinDbToCoraConverterFactoryImp.factor("someType");
 	}
 
 	@Test
 	public void testFactoryPlace() throws Exception {
-		AlvinToCoraConverter converter = alvinToCoraConverterFactoryImp.factor("place");
-		assertTrue(converter instanceof AlvinToCoraPlaceConverter);
+		AlvinDbToCoraConverter converter = alvinDbToCoraConverterFactoryImp.factor("country");
+		assertTrue(converter instanceof AlvinDbToCoraCountryConverter);
 	}
 }

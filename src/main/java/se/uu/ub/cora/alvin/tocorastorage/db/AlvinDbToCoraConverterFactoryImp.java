@@ -16,12 +16,18 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.db;
 
-import se.uu.ub.cora.bookkeeper.data.DataGroup;
+import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 
-public interface AlvinToCoraConverter {
+public class AlvinDbToCoraConverterFactoryImp implements AlvinDbToCoraConverterFactory {
 
-	DataGroup fromXML(String xml);
+	@Override
+	public AlvinDbToCoraConverter factor(String type) {
+		if ("country".equals(type)) {
+			return new AlvinDbToCoraCountryConverter();
+		}
+		throw NotImplementedException.withMessage("No converter implemented for: " + type);
+	}
 
 }

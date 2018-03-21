@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage;
+package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,29 +24,30 @@ import java.util.Collection;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 
-public final class AlvinToCoraRecordStorage implements RecordStorage {
+public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 
 	private static final String PLACE = "place";
 	private HttpHandlerFactory httpHandlerFactory;
 	private String baseURL;
-	private AlvinToCoraConverterFactory converterFactory;
+	private AlvinFedoraToCoraConverterFactory converterFactory;
 
-	private AlvinToCoraRecordStorage(HttpHandlerFactory httpHandlerFactory,
-			AlvinToCoraConverterFactory converterFactory, String baseURL) {
+	private AlvinFedoraToCoraRecordStorage(HttpHandlerFactory httpHandlerFactory,
+			AlvinFedoraToCoraConverterFactory converterFactory, String baseURL) {
 		this.httpHandlerFactory = httpHandlerFactory;
 		this.converterFactory = converterFactory;
 		this.baseURL = baseURL;
 	}
 
-	public static AlvinToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(
-			HttpHandlerFactory httpHandlerFactory, AlvinToCoraConverterFactory converterFactory,
-			String baseURL) {
-		return new AlvinToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL);
+	public static AlvinFedoraToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(
+			HttpHandlerFactory httpHandlerFactory,
+			AlvinFedoraToCoraConverterFactory converterFactory, String baseURL) {
+		return new AlvinFedoraToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL);
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public final class AlvinToCoraRecordStorage implements RecordStorage {
 
 	private DataGroup readAndConvertPlaceFromFedora(String id) {
 		HttpHandler httpHandler = createHttpHandlerForPlace(id);
-		AlvinToCoraConverter toCoraConverter = converterFactory.factor(PLACE);
+		AlvinFedoraToCoraConverter toCoraConverter = converterFactory.factor(PLACE);
 		return toCoraConverter.fromXML(httpHandler.getResponseText());
 	}
 
