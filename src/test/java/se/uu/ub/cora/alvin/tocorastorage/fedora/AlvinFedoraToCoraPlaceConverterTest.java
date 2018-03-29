@@ -131,7 +131,6 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		DataGroup country = placeDataGroup.getFirstGroupWithNameInData("country");
 		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordType"), "country");
 		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordId"), "SE");
-
 	}
 
 	@Test
@@ -174,6 +173,42 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("longitude"), "15.62");
 
 		assertFalse(placeDataGroup.containsChildWithNameInData("country"));
-
 	}
+
+	@Test
+	public void convertFromXMLNoCoordinates() throws Exception {
+		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place24NoCoordinates);
+		assertEquals(placeDataGroup.getNameInData(), "authority");
+		DataGroup recordInfo = placeDataGroup.getFirstGroupWithNameInData("recordInfo");
+
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"),
+				"alvin-place:24_noCoordinates");
+
+		assertFalse(placeDataGroup.containsChildWithNameInData("coordinates"));
+	}
+
+	@Test
+	public void convertFromXMLNoLatitude() throws Exception {
+		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place24NoLatitudeXML);
+		assertEquals(placeDataGroup.getNameInData(), "authority");
+		DataGroup recordInfo = placeDataGroup.getFirstGroupWithNameInData("recordInfo");
+
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"),
+				"alvin-place:24_noLatitude");
+
+		assertFalse(placeDataGroup.containsChildWithNameInData("coordinates"));
+	}
+
+	@Test
+	public void convertFromXMLNoLongitude() throws Exception {
+		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place24NoLongitudeXML);
+		assertEquals(placeDataGroup.getNameInData(), "authority");
+		DataGroup recordInfo = placeDataGroup.getFirstGroupWithNameInData("recordInfo");
+
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"),
+				"alvin-place:24_noLongitude");
+
+		assertFalse(placeDataGroup.containsChildWithNameInData("coordinates"));
+	}
+
 }

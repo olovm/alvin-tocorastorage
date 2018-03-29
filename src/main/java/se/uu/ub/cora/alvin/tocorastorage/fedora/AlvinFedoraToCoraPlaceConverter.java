@@ -40,10 +40,8 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 	private DataGroup tryToCreateDataGroupFromDocument() {
 		DataGroup place = DataGroup.withNameInData("authority");
 		createRecordInfoAndAddToPlace(place);
-
 		createDefaultNameAndAddToPlace(place);
-
-		createCoordinatesAndAddToPlace(place);
+		possiblyCreateCoordinatesAndAddToPlace(place);
 		possiblyCreateCountryAndAddToPlace(place);
 		return place;
 	}
@@ -72,13 +70,24 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 				getStringFromDocumentUsingXPath("/place/defaultPlaceName/name/text()")));
 	}
 
-	private void createCoordinatesAndAddToPlace(DataGroup place) {
+	private void possiblyCreateCoordinatesAndAddToPlace(DataGroup place) {
+		String latitude = getStringFromDocumentUsingXPath("/place/latitude/text()");
+		String longitude = getStringFromDocumentUsingXPath("/place/longitude/text()");
+		if (xmlContainsACompleteCoordinate(latitude, longitude)) {
+			createCoordinatesAndAddToPlace(place, latitude, longitude);
+		}
+	}
+
+	private boolean xmlContainsACompleteCoordinate(String latitude, String longitude) {
+		return valueExists(latitude) && valueExists(longitude);
+	}
+
+	private void createCoordinatesAndAddToPlace(DataGroup place, String latitude,
+			String longitude) {
 		DataGroup coordinates = DataGroup.withNameInData("coordinates");
+		coordinates.addChild(DataAtomic.withNameInDataAndValue("latitude", latitude));
+		coordinates.addChild(DataAtomic.withNameInDataAndValue("longitude", longitude));
 		place.addChild(coordinates);
-		coordinates.addChild(DataAtomic.withNameInDataAndValue("latitude",
-				getStringFromDocumentUsingXPath("/place/latitude/text()")));
-		coordinates.addChild(DataAtomic.withNameInDataAndValue("longitude",
-				getStringFromDocumentUsingXPath("/place/longitude/text()")));
 	}
 
 	private void possiblyCreateCountryAndAddToPlace(DataGroup place) {
