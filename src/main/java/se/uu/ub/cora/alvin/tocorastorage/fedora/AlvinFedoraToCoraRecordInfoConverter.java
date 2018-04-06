@@ -97,8 +97,7 @@ public class AlvinFedoraToCoraRecordInfoConverter {
 
 	private void parseAndAddTsUpdated() {
 		String tsUpdatedWithUTC = getLastTsUpdatedFromDocument();
-		String tsUpdated = removeUTCFromTimestamp(tsUpdatedWithUTC);
-
+		String tsUpdated = removeUTCFromTimestampOrUseTsCreated(tsUpdatedWithUTC);
 		recordInfo.addChild(DataAtomic.withNameInDataAndValue("tsUpdated", tsUpdated));
 	}
 
@@ -106,11 +105,25 @@ public class AlvinFedoraToCoraRecordInfoConverter {
 		NodeList list = parser.getNodeListFromDocumentUsingXPath(
 				"/place/recordInfo/updated/userAction/date/text()");
 		Node item = getTheLastTsUpdatedAsItShouldBeTheLatest(list);
-		return item.getTextContent();
+		return item != null ? item.getTextContent() : "";
 	}
 
 	private Node getTheLastTsUpdatedAsItShouldBeTheLatest(NodeList list) {
 		return list.item(list.getLength() - 1);
 	}
 
+	private String removeUTCFromTimestampOrUseTsCreated(String tsUpdatedWithUTC) {
+		if(isNotEmpty(tsUpdatedWithUTC)) {
+			return removeUTCFromTimestamp(tsUpdatedWithUTC);
+		}
+		return tsCreatedToUseAsTsUpdated();
+	}
+
+	private boolean isNotEmpty(String tsUpdatedWithUTC) {
+		return !"".equals(tsUpdatedWithUTC);
+	}
+
+	private String tsCreatedToUseAsTsUpdated() {
+		return recordInfo.getFirstAtomicValueWithNameInData("tsCreated");
+	}
 }

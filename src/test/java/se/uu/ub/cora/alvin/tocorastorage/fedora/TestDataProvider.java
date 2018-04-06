@@ -329,4 +329,33 @@ public class TestDataProvider {
 			+ "        <unique>false</unique>\n" + "      </type>\n" + "      <text>873</text>\n"
 			+ "    </localIdentifier>\n" + "  </localIdentifiers>\n" + "</place>";
 
+	public static String place5NoTsUpdated = "<place id=\"1\">\n" +
+			"<pid>alvin-place:5</pid>\n" +
+			"<dsId>METADATA</dsId>\n" +
+			"<recordInfo id=\"2\">\n" +
+			"<externalDs>false</externalDs>\n" +
+			"<lastAction>CREATED</lastAction>\n" +
+			"<created id=\"3\">\n" +
+			"<date id=\"4\">2017-10-27 22:36:51.991 UTC</date>\n" +
+			"<user class=\"authenticatedUser\" id=\"5\">\n" +
+			"<userId>mimsu695</userId>\n" +
+			"<domain>uu</domain>\n" +
+			"<firstName>Mimmi</firstName><lastName>Sundin</lastName>\n" +
+			"<email></email>\n" +
+			"</user>\n" +
+			"<note>Place created from import</note>\n" +
+			"<type>CREATED</type></created>\n" +
+			"<updated id=\"6\">\n" +
+			"<userAction reference=\"3\"/>\n" +
+			"</updated>\n" +
+			"</recordInfo><regions id=\"7\"/>\n" +
+			"<defaultPlaceName id=\"8\">\n" +
+			"<deleted>false</deleted>\n" +
+			"<name>Uddetorp</name>\n" +
+			"</defaultPlaceName>\n" +
+			"<placeNameForms id=\"9\"/>\n" +
+			"<identifiers id=\"10\"/>\n" +
+			"<localIdentifiers id=\"11\"/>\n" +
+			"</place>";
+
 }

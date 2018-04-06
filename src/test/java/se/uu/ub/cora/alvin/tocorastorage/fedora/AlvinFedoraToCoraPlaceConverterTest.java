@@ -211,4 +211,28 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertFalse(placeDataGroup.containsChildWithNameInData("coordinates"));
 	}
 
+	@Test
+	public void convertFromXMLNoUpdatedInfoSetsToSameAsCreatedInfo() throws Exception {
+		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place5NoTsUpdated);
+		assertEquals(placeDataGroup.getNameInData(), "authority");
+		DataGroup recordInfo = placeDataGroup.getFirstGroupWithNameInData("recordInfo");
+
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"),
+				"alvin-place:5");
+
+		DataGroup createdBy = recordInfo.getFirstGroupWithNameInData("createdBy");
+		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
+		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
+
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
+				"2017-10-27 22:36:51.991");
+
+		DataGroup updatedBy = recordInfo.getFirstGroupWithNameInData("updatedBy");
+		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
+		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
+
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsUpdated"),
+				"2017-10-27 22:36:51.991");
+	}
+
 }
