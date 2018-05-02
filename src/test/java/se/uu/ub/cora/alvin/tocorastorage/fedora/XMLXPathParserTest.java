@@ -21,7 +21,6 @@ package se.uu.ub.cora.alvin.tocorastorage.fedora;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.ParseException;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.XMLXPathParser;
 
 public class XMLXPathParserTest {
 
@@ -39,4 +38,12 @@ public class XMLXPathParserTest {
 		parser.getNodeListFromDocumentUsingXPath("/broken/xpath/string not");
 
 	}
+
+	@Test(expectedExceptions = ParseException.class, expectedExceptionsMessageRegExp = ""
+			+ "Unable to use xpathString: javax.xml.transform.TransformerException: Extra illegal tokens: 'not'")
+	public void testMalformedNodeXPath() throws Exception {
+		XMLXPathParser parser = XMLXPathParser.forXML("<pid></pid>");
+		parser.getStringFromNodeUsingXPath(null, "/broken/xpath/string not");
+	}
+
 }

@@ -18,6 +18,9 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import se.uu.ub.cora.alvin.tocorastorage.ParseException;
 import se.uu.ub.cora.bookkeeper.data.DataAtomic;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
@@ -43,7 +46,67 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		createDefaultNameAndAddToPlace(place);
 		possiblyCreateCoordinatesAndAddToPlace(place);
 		possiblyCreateCountryAndAddToPlace(place);
+		possiblyCreateAlternativelNamesAndAddToPlace(place);
+
 		return place;
+	}
+
+	private void possiblyCreateAlternativelNamesAndAddToPlace(DataGroup place) {
+		NodeList placeNames = parser
+				.getNodeListFromDocumentUsingXPath("/place/placeNameForms/entry");
+		extractAlternativeNameFromNodesInListAndAddToPlace(place, placeNames);
+	}
+
+	private void extractAlternativeNameFromNodesInListAndAddToPlace(DataGroup place,
+			NodeList placeNames) {
+		for (int idx = 0; idx < placeNames.getLength(); idx++) {
+			Node placeName = placeNames.item(idx);
+			extractAlternativeNameFromNodeAndAddToPlace(place, placeName, idx);
+		}
+	}
+
+	private void extractAlternativeNameFromNodeAndAddToPlace(DataGroup place,
+			Node alternativeNameXML, int repeatId) {
+		DataGroup localName = createDataGroupWithRepeatId(repeatId);
+		convertLanguagePart(alternativeNameXML, localName);
+		convertNamePart(alternativeNameXML, localName);
+		place.addChild(localName);
+	}
+
+	private void convertNamePart(Node alternativeNameXML, DataGroup localName) {
+		DataGroup namePart = createNamePart();
+		extractNameValueAndAddToNamePart(alternativeNameXML, namePart);
+		localName.addChild(namePart);
+	}
+
+	private DataGroup createNamePart() {
+		DataGroup namePart = DataGroup.withNameInData("namePart");
+		namePart.addAttributeByIdWithValue("type", "defaultName");
+		return namePart;
+	}
+
+	private void extractNameValueAndAddToNamePart(Node alternativeNameXML, DataGroup namePart) {
+		String nameValue = extractValueFromNode(alternativeNameXML, "placeNameForm/name");
+		DataAtomic alternativeName = DataAtomic.withNameInDataAndValue("value", nameValue);
+		namePart.addChild(alternativeName);
+	}
+
+	private void convertLanguagePart(Node placeName, DataGroup localName) {
+		String languageValue = extractValueFromNode(placeName, "placeNameForm/language/alpha3Code");
+		DataAtomic alternativeLanguage = DataAtomic.withNameInDataAndValue("language",
+				languageValue);
+		localName.addChild(alternativeLanguage);
+	}
+
+	private DataGroup createDataGroupWithRepeatId(int repeatId) {
+		DataGroup localName = DataGroup.withNameInData("name");
+		localName.setRepeatId(String.valueOf(repeatId));
+		localName.addAttributeByIdWithValue("type", "alternative");
+		return localName;
+	}
+
+	private String extractValueFromNode(Node placeName, String propertyXPath) {
+		return parser.getStringFromNodeUsingXPath(placeName, propertyXPath);
 	}
 
 	private void createRecordInfoAndAddToPlace(DataGroup place) {
