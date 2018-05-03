@@ -143,7 +143,7 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 	}
 
 	private void convertLanguagePart(DataGroup localName, Node placeName) {
-		String languageValue = extractValueFromNode(placeName, "placeNameForm/language/alpha3Code");
+		String languageValue = extractValueFromNode(placeName, "placeNameForm/language/alpha2Code");
 		DataAtomic alternativeLanguage = DataAtomic.withNameInDataAndValue("language",
 				languageValue);
 		localName.addChild(alternativeLanguage);
