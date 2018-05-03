@@ -407,7 +407,7 @@ public class TestDataProvider {
 			+ "          <localisedNames id=\"27\">\n" + "            <entry>\n"
 			+ "              <string>en</string>\n" + "              <string>Latin</string>\n"
 			+ "            </entry>\n" + "          </localisedNames>\n"
-			+ "          <alpha3Code>swe</alpha3Code>\n" + "          <alpha2Code>la</alpha2Code>\n"
+			+ "          <alpha3Code>swe</alpha3Code>\n" + "          <alpha2Code>sv</alpha2Code>\n"
 			+ "        </language>\n" + "      </placeNameForm>\n" + "    </entry>\n"
 			+ "  </placeNameForms>\n" + "  <identifiers id=\"28\"/>\n"
 			+ "  <longitude>13.18</longitude>\n" + "  <latitude>55.7</latitude>\n"
