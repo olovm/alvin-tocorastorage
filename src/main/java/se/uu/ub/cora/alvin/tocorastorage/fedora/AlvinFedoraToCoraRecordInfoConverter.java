@@ -45,8 +45,30 @@ public class AlvinFedoraToCoraRecordInfoConverter {
 		addDataDivider();
 		addCreatedBy();
 		parseAndAddTsCreated();
-		addUpdatedBy();
-		parseAndAddTsUpdated();
+
+		NodeList userUpdates = parser
+				.getNodeListFromDocumentUsingXPath("/place/recordInfo/updated/userAction");
+		for (int i = 0; i < userUpdates.getLength(); i++) {
+			Node userUpdated = userUpdates.item(i);
+
+			NodeList childNodes = userUpdated.getChildNodes();
+			if (childNodes.getLength() > 0) {
+				DataGroup updated = DataGroup.withNameInData("updated");
+				updated.setRepeatId(String.valueOf(i));
+				addUpdatedBy(updated);
+				parseAndAddTsUpdated(updated, userUpdated);
+
+				recordInfo.addChild(updated);
+			}
+		}
+		if (!recordInfo.containsChildWithNameInData("updated")) {
+			DataGroup updated = DataGroup.withNameInData("updated");
+			updated.setRepeatId(String.valueOf("0"));
+			addUpdatedBy(updated);
+			updated.addChild(
+					DataAtomic.withNameInDataAndValue("tsUpdated", tsCreatedToUseAsTsUpdated()));
+			recordInfo.addChild(updated);
+		}
 		return recordInfo;
 	}
 
@@ -90,15 +112,17 @@ public class AlvinFedoraToCoraRecordInfoConverter {
 		return tsCreatedWithUTC.substring(0, tsCreatedWithUTC.indexOf("UTC") - 1);
 	}
 
-	private void addUpdatedBy() {
+	private void addUpdatedBy(DataGroup updated) {
 		DataGroup updatedBy = createLinkWithNameInDataAndTypeAndId("updatedBy", "user", "12345");
-		recordInfo.addChild(updatedBy);
+		updated.addChild(updatedBy);
 	}
 
-	private void parseAndAddTsUpdated() {
-		String tsUpdatedWithUTC = getLastTsUpdatedFromDocument();
+	private void parseAndAddTsUpdated(DataGroup updated, Node node) {
+		// String tsUpdatedWithUTC = getLastTsUpdatedFromDocument();
+		String tsUpdatedWithUTC = parser.getStringFromNodeUsingXPath(node, "date/text()");
+
 		String tsUpdated = removeUTCFromTimestampOrUseTsCreated(tsUpdatedWithUTC);
-		recordInfo.addChild(DataAtomic.withNameInDataAndValue("tsUpdated", tsUpdated));
+		updated.addChild(DataAtomic.withNameInDataAndValue("tsUpdated", tsUpdated));
 	}
 
 	private String getLastTsUpdatedFromDocument() {
@@ -113,7 +137,7 @@ public class AlvinFedoraToCoraRecordInfoConverter {
 	}
 
 	private String removeUTCFromTimestampOrUseTsCreated(String tsUpdatedWithUTC) {
-		if(isNotEmpty(tsUpdatedWithUTC)) {
+		if (isNotEmpty(tsUpdatedWithUTC)) {
 			return removeUTCFromTimestamp(tsUpdatedWithUTC);
 		}
 		return tsCreatedToUseAsTsUpdated();
