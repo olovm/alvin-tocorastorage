@@ -45,8 +45,8 @@ public class AlvinFedoraToCoraRecordInfoConverter {
 		addDataDivider();
 		addCreatedBy();
 		parseAndAddTsCreated();
-		addUpdatedBy();
-		parseAndAddTsUpdated();
+
+		parseAndAddUpdateInfo();
 		return recordInfo;
 	}
 
@@ -81,7 +81,7 @@ public class AlvinFedoraToCoraRecordInfoConverter {
 
 	private void parseAndAddTsCreated() {
 		String tsCreatedWithUTC = parser
-				.getStringFromDocumentUsingXPath("/place/recordInfo/created/date/text()");
+				.getStringFromDocumentUsingXPath("/place/recordInfo/created/date");
 		String tsCreated = removeUTCFromTimestamp(tsCreatedWithUTC);
 		recordInfo.addChild(DataAtomic.withNameInDataAndValue("tsCreated", tsCreated));
 	}
@@ -90,30 +90,39 @@ public class AlvinFedoraToCoraRecordInfoConverter {
 		return tsCreatedWithUTC.substring(0, tsCreatedWithUTC.indexOf("UTC") - 1);
 	}
 
-	private void addUpdatedBy() {
+	private void parseAndAddUpdateInfo() {
+		NodeList updates = extractAllUpdates();
+		for (int i = 0; i < updates.getLength(); i++) {
+			Node updated = updates.item(i);
+			createAndAddUpdateUsingNodeAndRepeatId(updated, i);
+		}
+	}
+
+	private NodeList extractAllUpdates() {
+		return parser.getNodeListFromDocumentUsingXPath("/place/recordInfo/updated/userAction");
+	}
+
+	private void createAndAddUpdateUsingNodeAndRepeatId(Node userUpdated, int repeatId) {
+		DataGroup updated = DataGroup.withNameInData("updated");
+		updated.setRepeatId(String.valueOf(repeatId));
+		addUpdatedBy(updated);
+		parseAndAddTsUpdated(updated, userUpdated);
+		recordInfo.addChild(updated);
+	}
+
+	private void addUpdatedBy(DataGroup updated) {
 		DataGroup updatedBy = createLinkWithNameInDataAndTypeAndId("updatedBy", "user", "12345");
-		recordInfo.addChild(updatedBy);
+		updated.addChild(updatedBy);
 	}
 
-	private void parseAndAddTsUpdated() {
-		String tsUpdatedWithUTC = getLastTsUpdatedFromDocument();
+	private void parseAndAddTsUpdated(DataGroup updated, Node node) {
+		String tsUpdatedWithUTC = parser.getStringFromNodeUsingXPath(node, "date/text()");
 		String tsUpdated = removeUTCFromTimestampOrUseTsCreated(tsUpdatedWithUTC);
-		recordInfo.addChild(DataAtomic.withNameInDataAndValue("tsUpdated", tsUpdated));
-	}
-
-	private String getLastTsUpdatedFromDocument() {
-		NodeList list = parser.getNodeListFromDocumentUsingXPath(
-				"/place/recordInfo/updated/userAction/date/text()");
-		Node item = getTheLastTsUpdatedAsItShouldBeTheLatest(list);
-		return item != null ? item.getTextContent() : "";
-	}
-
-	private Node getTheLastTsUpdatedAsItShouldBeTheLatest(NodeList list) {
-		return list.item(list.getLength() - 1);
+		updated.addChild(DataAtomic.withNameInDataAndValue("tsUpdated", tsUpdated));
 	}
 
 	private String removeUTCFromTimestampOrUseTsCreated(String tsUpdatedWithUTC) {
-		if(isNotEmpty(tsUpdatedWithUTC)) {
+		if (isNotEmpty(tsUpdatedWithUTC)) {
 			return removeUTCFromTimestamp(tsUpdatedWithUTC);
 		}
 		return tsCreatedToUseAsTsUpdated();

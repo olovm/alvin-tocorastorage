@@ -73,23 +73,23 @@ public final class XMLXPathParser {
 
 	public String getStringFromDocumentUsingXPath(String xpathString) {
 		try {
-			XPathExpression expr;
-			expr = xpath.compile(xpathString);
+			XPathExpression expr = xpath.compile(xpathString);
 			return (String) expr.evaluate(document, XPathConstants.STRING);
 		} catch (XPathExpressionException e) {
-			throw ParseException
-					.withMessageAndException("Unable to use xpathString: " + e.getMessage(), e);
+			throw ParseException.withMessageAndException(composeMessage(e), e);
 		}
+	}
+
+	private String composeMessage(XPathExpressionException e) {
+		return "Unable to use xpathString: " + e.getMessage();
 	}
 
 	public String getStringFromNodeUsingXPath(Node node, String xpathString) {
 		try {
-			XPathExpression expr;
-			expr = xpath.compile(xpathString);
+			XPathExpression expr = xpath.compile(xpathString);
 			return (String) expr.evaluate(node, XPathConstants.STRING);
 		} catch (XPathExpressionException e) {
-			throw ParseException
-					.withMessageAndException("Unable to use xpathString: " + e.getMessage(), e);
+			throw ParseException.withMessageAndException(composeMessage(e), e);
 		}
 	}
 
@@ -98,8 +98,7 @@ public final class XMLXPathParser {
 			XPathExpression expr = xpath.compile(xpathString);
 			return (NodeList) expr.evaluate(document, XPathConstants.NODESET);
 		} catch (XPathExpressionException e) {
-			throw ParseException
-					.withMessageAndException("Unable to use xpathString: " + e.getMessage(), e);
+			throw ParseException.withMessageAndException(composeMessage(e), e);
 		}
 	}
 

@@ -69,11 +69,13 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
 				"2014-12-18 20:20:38.346");
 
-		DataGroup updatedBy = recordInfo.getFirstGroupWithNameInData("updatedBy");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
+		List<DataGroup> updatedList = recordInfo.getAllGroupsWithNameInData("updated");
+		assertEquals(updatedList.size(), 2);
 
-		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsUpdated"),
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "0",
+				"2014-12-18 20:20:38.346");
+
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(1), "1",
 				"2014-12-18 20:21:20.880");
 
 		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
@@ -114,11 +116,14 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
 				"2014-12-18 22:16:44.623");
 
-		DataGroup updatedBy = recordInfo.getFirstGroupWithNameInData("updatedBy");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
+		List<DataGroup> updatedList = recordInfo.getAllGroupsWithNameInData("updated");
+		assertEquals(updatedList.size(), 3);
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "0",
+				"2014-12-18 22:16:44.623");
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(1), "1",
+				"2014-12-18 22:18:01.276");
 
-		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsUpdated"),
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(2), "2",
 				"2016-02-12 10:29:43.147");
 
 		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
@@ -134,6 +139,17 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		DataGroup country = placeDataGroup.getFirstGroupWithNameInData("country");
 		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordType"), "country");
 		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordId"), "SE");
+	}
+
+	private void assertCorrectUpdateWithRepeatIdAndTsUpdated(DataGroup updated, String repeatId,
+			String tsUpdated) {
+		assertEquals(updated.getRepeatId(), repeatId);
+
+		DataGroup updatedBy = updated.getFirstGroupWithNameInData("updatedBy");
+		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
+		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
+
+		assertEquals(updated.getFirstAtomicValueWithNameInData("tsUpdated"), tsUpdated);
 	}
 
 	@Test
@@ -158,11 +174,11 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
 				"2014-12-18 20:20:38.346");
 
-		DataGroup updatedBy = recordInfo.getFirstGroupWithNameInData("updatedBy");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
-
-		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsUpdated"),
+		List<DataGroup> updatedList = recordInfo.getAllGroupsWithNameInData("updated");
+		assertEquals(updatedList.size(), 2);
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "0",
+				"2014-12-18 20:20:38.346");
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(1), "1",
 				"2014-12-18 20:21:20.880");
 
 		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
@@ -229,11 +245,9 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsCreated"),
 				"2017-10-27 22:36:51.991");
 
-		DataGroup updatedBy = recordInfo.getFirstGroupWithNameInData("updatedBy");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
-
-		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsUpdated"),
+		List<DataGroup> updatedList = recordInfo.getAllGroupsWithNameInData("updated");
+		assertEquals(updatedList.size(), 1);
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "0",
 				"2017-10-27 22:36:51.991");
 	}
 
