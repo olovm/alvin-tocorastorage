@@ -70,15 +70,12 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 				"2014-12-18 20:20:38.346");
 
 		List<DataGroup> updatedList = recordInfo.getAllGroupsWithNameInData("updated");
-		assertEquals(updatedList.size(), 1);
-		DataGroup updated = updatedList.get(0);
-		assertEquals(updated.getRepeatId(), "1");
+		assertEquals(updatedList.size(), 2);
 
-		DataGroup updatedBy = updated.getFirstGroupWithNameInData("updatedBy");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
-		assertEquals(updatedBy.getFirstAtomicValueWithNameInData("linkedRecordId"), "12345");
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "0",
+				"2014-12-18 20:20:38.346");
 
-		assertEquals(updated.getFirstAtomicValueWithNameInData("tsUpdated"),
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(1), "1",
 				"2014-12-18 20:21:20.880");
 
 		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
@@ -120,11 +117,13 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 				"2014-12-18 22:16:44.623");
 
 		List<DataGroup> updatedList = recordInfo.getAllGroupsWithNameInData("updated");
-		assertEquals(updatedList.size(), 2);
-		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "1",
+		assertEquals(updatedList.size(), 3);
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "0",
+				"2014-12-18 22:16:44.623");
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(1), "1",
 				"2014-12-18 22:18:01.276");
 
-		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(1), "2",
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(2), "2",
 				"2016-02-12 10:29:43.147");
 
 		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
@@ -176,8 +175,10 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 				"2014-12-18 20:20:38.346");
 
 		List<DataGroup> updatedList = recordInfo.getAllGroupsWithNameInData("updated");
-		assertEquals(updatedList.size(), 1);
-		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "1",
+		assertEquals(updatedList.size(), 2);
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(0), "0",
+				"2014-12-18 20:20:38.346");
+		assertCorrectUpdateWithRepeatIdAndTsUpdated(updatedList.get(1), "1",
 				"2014-12-18 20:21:20.880");
 
 		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
