@@ -21,10 +21,13 @@ package se.uu.ub.cora.alvin.tocorastorage.fedora;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
+import java.util.List;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.ParseException;
+import se.uu.ub.cora.bookkeeper.data.DataAttribute;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
 public class AlvinFedoraToCoraPlaceConverterTest {
@@ -217,8 +220,7 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(placeDataGroup.getNameInData(), "authority");
 		DataGroup recordInfo = placeDataGroup.getFirstGroupWithNameInData("recordInfo");
 
-		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"),
-				"alvin-place:5");
+		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"), "alvin-place:5");
 
 		DataGroup createdBy = recordInfo.getFirstGroupWithNameInData("createdBy");
 		assertEquals(createdBy.getFirstAtomicValueWithNameInData("linkedRecordType"), "user");
@@ -233,6 +235,74 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 
 		assertEquals(recordInfo.getFirstAtomicValueWithNameInData("tsUpdated"),
 				"2017-10-27 22:36:51.991");
+	}
+
+	@Test
+	public void convertFromXMLNoAlternativeName() throws Exception {
+		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place22_noCountry_XML);
+		DataAttribute alternativeAttribute = DataAttribute.withNameInDataAndValue("type",
+				"alternative");
+
+		List<DataGroup> alternativeNames = (List<DataGroup>) placeDataGroup
+				.getAllGroupsWithNameInDataAndAttributes("name", alternativeAttribute);
+		assertEquals(alternativeNames.size(), 0);
+	}
+
+	@Test
+	public void convertAlternativeNameFromXML24() throws Exception {
+		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place24XML);
+
+		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
+		assertEquals(defaultName.getAttribute("type"), "authorized");
+		DataGroup defaultNamePart = defaultName.getFirstGroupWithNameInData("namePart");
+		assertEquals(defaultNamePart.getAttribute("type"), "defaultName");
+		assertEquals(defaultNamePart.getFirstAtomicValueWithNameInData("value"), "Lund");
+		DataAttribute alternativeAttribute = DataAttribute.withNameInDataAndValue("type",
+				"alternative");
+
+		List<DataGroup> alternativeNames = (List<DataGroup>) placeDataGroup
+				.getAllGroupsWithNameInDataAndAttributes("name", alternativeAttribute);
+		assertEquals(alternativeNames.size(), 1);
+
+		DataGroup alternativeName = alternativeNames.get(0);
+		assertEquals(alternativeName.getRepeatId(), "0");
+		assertCorrectAlternativeName("lat", "Londini Gothorum", alternativeName);
+
+	}
+
+	@Test
+	public void convertTwoAlternativeNamesFromXML24() throws Exception {
+		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place24DoublePlacesXML);
+
+		DataGroup defaultName = placeDataGroup.getFirstGroupWithNameInData("name");
+		assertEquals(defaultName.getAttribute("type"), "authorized");
+		DataGroup defaultNamePart = defaultName.getFirstGroupWithNameInData("namePart");
+		assertEquals(defaultNamePart.getAttribute("type"), "defaultName");
+		assertEquals(defaultNamePart.getFirstAtomicValueWithNameInData("value"), "Lund");
+		DataAttribute alternativeAttribute = DataAttribute.withNameInDataAndValue("type",
+				"alternative");
+
+		List<DataGroup> alternativeNames = (List<DataGroup>) placeDataGroup
+				.getAllGroupsWithNameInDataAndAttributes("name", alternativeAttribute);
+		assertEquals(alternativeNames.size(), 2);
+
+		DataGroup alternativeName = alternativeNames.get(0);
+		assertEquals(alternativeName.getRepeatId(), "0");
+		assertCorrectAlternativeName("lat", "Londini Gothorum", alternativeNames.get(0));
+
+		DataGroup otherAlternativeName = alternativeNames.get(1);
+		assertEquals(otherAlternativeName.getRepeatId(), "1");
+		assertCorrectAlternativeName("swe", "Ankeborg", otherAlternativeName);
+
+	}
+
+	private void assertCorrectAlternativeName(String languageCode, String name,
+			DataGroup alternativeName) {
+		String language = alternativeName.getFirstAtomicValueWithNameInData("language");
+		assertEquals(language, languageCode);
+		DataGroup alternativeNamePart = alternativeName.getFirstGroupWithNameInData("namePart");
+		assertEquals(alternativeNamePart.getAttribute("type"), "defaultName");
+		assertEquals(alternativeNamePart.getFirstAtomicValueWithNameInData("value"), name);
 	}
 
 }

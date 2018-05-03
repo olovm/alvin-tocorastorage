@@ -14,6 +14,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
@@ -79,7 +80,17 @@ public final class XMLXPathParser {
 			throw ParseException
 					.withMessageAndException("Unable to use xpathString: " + e.getMessage(), e);
 		}
+	}
 
+	public String getStringFromNodeUsingXPath(Node node, String xpathString) {
+		try {
+			XPathExpression expr;
+			expr = xpath.compile(xpathString);
+			return (String) expr.evaluate(node, XPathConstants.STRING);
+		} catch (XPathExpressionException e) {
+			throw ParseException
+					.withMessageAndException("Unable to use xpathString: " + e.getMessage(), e);
+		}
 	}
 
 	public NodeList getNodeListFromDocumentUsingXPath(String xpathString) {

@@ -18,6 +18,9 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import se.uu.ub.cora.alvin.tocorastorage.ParseException;
 import se.uu.ub.cora.bookkeeper.data.DataAtomic;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
@@ -43,16 +46,14 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		createDefaultNameAndAddToPlace(place);
 		possiblyCreateCoordinatesAndAddToPlace(place);
 		possiblyCreateCountryAndAddToPlace(place);
+		possiblyCreateAlternativeNamesAndAddToPlace(place);
+
 		return place;
 	}
 
 	private void createRecordInfoAndAddToPlace(DataGroup place) {
 		DataGroup recordInfo = AlvinFedoraToCoraRecordInfoConverter.createRecordInfo(parser);
 		place.addChild(recordInfo);
-	}
-
-	private String getStringFromDocumentUsingXPath(String xpathString) {
-		return parser.getStringFromDocumentUsingXPath(xpathString);
 	}
 
 	private void createDefaultNameAndAddToPlace(DataGroup place) {
@@ -68,6 +69,10 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		defaultNamePart.addAttributeByIdWithValue("type", "defaultName");
 		defaultNamePart.addChild(DataAtomic.withNameInDataAndValue("value",
 				getStringFromDocumentUsingXPath("/place/defaultPlaceName/name/text()")));
+	}
+
+	private String getStringFromDocumentUsingXPath(String xpathString) {
+		return parser.getStringFromDocumentUsingXPath(xpathString);
 	}
 
 	private void possiblyCreateCoordinatesAndAddToPlace(DataGroup place) {
@@ -106,6 +111,64 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		country.addChild(DataAtomic.withNameInDataAndValue("linkedRecordType", "country"));
 		country.addChild(DataAtomic.withNameInDataAndValue("linkedRecordId", alpha2Code));
 		place.addChild(country);
+	}
+
+	private void possiblyCreateAlternativeNamesAndAddToPlace(DataGroup place) {
+		NodeList placeNames = parser
+				.getNodeListFromDocumentUsingXPath("/place/placeNameForms/entry");
+		extractAlternativeNameFromNodesInListAndAddToPlace(place, placeNames);
+	}
+
+	private void extractAlternativeNameFromNodesInListAndAddToPlace(DataGroup place,
+			NodeList placeNames) {
+		for (int i = 0; i < placeNames.getLength(); i++) {
+			Node placeName = placeNames.item(i);
+			extractAlternativeNameFromNodeAndAddToPlace(place, placeName, i);
+		}
+	}
+
+	private void extractAlternativeNameFromNodeAndAddToPlace(DataGroup place,
+			Node alternativeNameNode, int repeatId) {
+		DataGroup nameGroup = createDataGroupWithRepeatId(repeatId);
+		convertLanguagePart(nameGroup, alternativeNameNode);
+		convertNamePart(nameGroup, alternativeNameNode);
+		place.addChild(nameGroup);
+	}
+
+	private DataGroup createDataGroupWithRepeatId(int repeatId) {
+		DataGroup localName = DataGroup.withNameInData("name");
+		localName.setRepeatId(String.valueOf(repeatId));
+		localName.addAttributeByIdWithValue("type", "alternative");
+		return localName;
+	}
+
+	private void convertLanguagePart(DataGroup localName, Node placeName) {
+		String languageValue = extractValueFromNode(placeName, "placeNameForm/language/alpha3Code");
+		DataAtomic alternativeLanguage = DataAtomic.withNameInDataAndValue("language",
+				languageValue);
+		localName.addChild(alternativeLanguage);
+	}
+
+	private String extractValueFromNode(Node placeName, String propertyXPath) {
+		return parser.getStringFromNodeUsingXPath(placeName, propertyXPath);
+	}
+
+	private void convertNamePart(DataGroup localName, Node alternativeNameNode) {
+		DataGroup namePart = createNamePart();
+		extractNameValueAndAddToNamePart(namePart, alternativeNameNode);
+		localName.addChild(namePart);
+	}
+
+	private DataGroup createNamePart() {
+		DataGroup namePart = DataGroup.withNameInData("namePart");
+		namePart.addAttributeByIdWithValue("type", "defaultName");
+		return namePart;
+	}
+
+	private void extractNameValueAndAddToNamePart(DataGroup namePart, Node alternativeNameXML) {
+		String nameValue = extractValueFromNode(alternativeNameXML, "placeNameForm/name");
+		DataAtomic alternativeName = DataAtomic.withNameInDataAndValue("value", nameValue);
+		namePart.addChild(alternativeName);
 	}
 
 }
