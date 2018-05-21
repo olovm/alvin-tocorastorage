@@ -107,9 +107,7 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 	}
 
 	private void createCountryAndAddToPlace(DataGroup place, String alpha2Code) {
-		DataGroup country = DataGroup.withNameInData("country");
-		country.addChild(DataAtomic.withNameInDataAndValue("linkedRecordType", "country"));
-		country.addChild(DataAtomic.withNameInDataAndValue("linkedRecordId", alpha2Code));
+		DataAtomic country = DataAtomic.withNameInDataAndValue("country", alpha2Code);
 		place.addChild(country);
 	}
 

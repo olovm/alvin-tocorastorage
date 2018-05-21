@@ -88,9 +88,8 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("latitude"), "58.42");
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("longitude"), "15.62");
 
-		DataGroup country = placeDataGroup.getFirstGroupWithNameInData("country");
-		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordType"), "country");
-		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordId"), "SE");
+		String country = placeDataGroup.getFirstAtomicValueWithNameInData("country");
+		assertEquals(country, "SE");
 
 	}
 
@@ -136,9 +135,8 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("latitude"), "55.7");
 		assertEquals(coordinates.getFirstAtomicValueWithNameInData("longitude"), "13.18");
 
-		DataGroup country = placeDataGroup.getFirstGroupWithNameInData("country");
-		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordType"), "country");
-		assertEquals(country.getFirstAtomicValueWithNameInData("linkedRecordId"), "SE");
+		String country = placeDataGroup.getFirstAtomicValueWithNameInData("country");
+		assertEquals(country, "SE");
 	}
 
 	private void assertCorrectUpdateWithRepeatIdAndTsUpdated(DataGroup updated, String repeatId,
