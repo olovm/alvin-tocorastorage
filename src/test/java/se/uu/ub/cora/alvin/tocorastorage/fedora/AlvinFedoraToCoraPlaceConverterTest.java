@@ -278,7 +278,7 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 
 		DataGroup alternativeName = alternativeNames.get(0);
 		assertEquals(alternativeName.getRepeatId(), "0");
-		assertCorrectAlternativeName("la", "Londini Gothorum", alternativeName);
+		assertCorrectAlternativeName("lat", "Londini Gothorum", alternativeName);
 
 	}
 
@@ -300,11 +300,11 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 
 		DataGroup alternativeName = alternativeNames.get(0);
 		assertEquals(alternativeName.getRepeatId(), "0");
-		assertCorrectAlternativeName("la", "Londini Gothorum", alternativeNames.get(0));
+		assertCorrectAlternativeName("lat", "Londini Gothorum", alternativeNames.get(0));
 
 		DataGroup otherAlternativeName = alternativeNames.get(1);
 		assertEquals(otherAlternativeName.getRepeatId(), "1");
-		assertCorrectAlternativeName("sv", "Ankeborg", otherAlternativeName);
+		assertCorrectAlternativeName("swe", "Ankeborg", otherAlternativeName);
 
 	}
 
