@@ -42,6 +42,7 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 
 	private DataGroup tryToCreateDataGroupFromDocument() {
 		DataGroup place = DataGroup.withNameInData("authority");
+		place.addAttributeByIdWithValue("type", "place");
 		createRecordInfoAndAddToPlace(place);
 		createDefaultNameAndAddToPlace(place);
 		possiblyCreateCoordinatesAndAddToPlace(place);

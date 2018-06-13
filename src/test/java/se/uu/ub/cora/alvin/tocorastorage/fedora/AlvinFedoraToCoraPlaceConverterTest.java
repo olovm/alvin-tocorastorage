@@ -51,6 +51,10 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 	public void convertFromXML() throws Exception {
 		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place22XML);
 		assertEquals(placeDataGroup.getNameInData(), "authority");
+
+		String attributeValueForType = placeDataGroup.getAttribute("type");
+		assertEquals(attributeValueForType, "place");
+
 		DataGroup recordInfo = placeDataGroup.getFirstGroupWithNameInData("recordInfo");
 		DataGroup type = recordInfo.getFirstGroupWithNameInData("type");
 		assertEquals(type.getFirstAtomicValueWithNameInData("linkedRecordType"), "recordType");
