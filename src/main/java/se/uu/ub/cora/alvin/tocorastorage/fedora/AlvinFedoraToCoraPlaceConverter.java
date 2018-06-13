@@ -48,6 +48,7 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		possiblyCreateCoordinatesAndAddToPlace(place);
 		possiblyCreateCountryAndAddToPlace(place);
 		possiblyCreateAlternativeNamesAndAddToPlace(place);
+		possiblyCreateIdentifiersAndAddToPlace(place);
 
 		return place;
 	}
@@ -168,6 +169,46 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		String nameValue = extractValueFromNode(alternativeNameXML, "placeNameForm/name");
 		DataAtomic alternativeName = DataAtomic.withNameInDataAndValue("value", nameValue);
 		namePart.addChild(alternativeName);
+	}
+
+	private void possiblyCreateIdentifiersAndAddToPlace(DataGroup place) {
+		NodeList localIdentifiers = parser
+				.getNodeListFromDocumentUsingXPath("/place/localIdentifiers/localIdentifier");
+		extractLocalIdentifiersAndAddToPlace(place, localIdentifiers);
+	}
+
+	private void extractLocalIdentifiersAndAddToPlace(DataGroup place, NodeList localIdentifiers) {
+		for (int i = 0; i < localIdentifiers.getLength(); i++) {
+			Node localIdentifier = localIdentifiers.item(i);
+			DataGroup identifierGroup = extractLocalIdentifier(i, localIdentifier);
+			place.addChild(identifierGroup);
+		}
+	}
+
+	private DataGroup extractLocalIdentifier(int repeatId, Node localIdentifier) {
+		DataGroup identifierGroup = createIdentifierGroupWithRepeatId(repeatId);
+
+		extractAndAddLocalIdentifierType(localIdentifier, identifierGroup);
+
+		extractAndAddLocalIdentifierValue(localIdentifier, identifierGroup);
+		return identifierGroup;
+	}
+
+	private DataGroup createIdentifierGroupWithRepeatId(int repeatId) {
+		DataGroup identifierGroup = DataGroup.withNameInData("identifier");
+		identifierGroup.setRepeatId(String.valueOf(repeatId));
+		return identifierGroup;
+	}
+
+	private void extractAndAddLocalIdentifierType(Node localIdentifier, DataGroup identifierGroup) {
+		String code = extractValueFromNode(localIdentifier, "type/code");
+		identifierGroup.addChild(DataAtomic.withNameInDataAndValue("identifierType", code));
+	}
+
+	private void extractAndAddLocalIdentifierValue(Node localIdentifier,
+			DataGroup identifierGroup) {
+		String text = extractValueFromNode(localIdentifier, "text");
+		identifierGroup.addChild(DataAtomic.withNameInDataAndValue("identifierValue", text));
 	}
 
 }

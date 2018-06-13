@@ -321,4 +321,35 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(alternativeNamePart.getFirstAtomicValueWithNameInData("value"), name);
 	}
 
+	@Test
+	public void convertFromXMLNoLocalIdentifiers() throws Exception {
+		DataGroup placeDataGroup = converter
+				.fromXML(TestDataProvider.place22_noLocalIdentifiers_XML);
+		assertFalse(placeDataGroup.containsChildWithNameInData("identifier"));
+	}
+
+	@Test
+	public void convertFromXMLLocalIdentifier() throws Exception {
+		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place22XML);
+		DataGroup identifierGroup = placeDataGroup.getFirstGroupWithNameInData("identifier");
+		assertCorrectIdentifierGroup(identifierGroup, "0", "waller", "1367");
+	}
+
+	protected void assertCorrectIdentifierGroup(DataGroup identifierGroup, String repeatId,
+			String type, String value) {
+		assertEquals(identifierGroup.getRepeatId(), repeatId);
+		assertEquals(identifierGroup.getFirstAtomicValueWithNameInData("identifierType"), type);
+		assertEquals(identifierGroup.getFirstAtomicValueWithNameInData("identifierValue"), value);
+	}
+
+	@Test
+	public void convertFromXMLTwoLocalIdentifier() throws Exception {
+		DataGroup placeDataGroup = converter
+				.fromXML(TestDataProvider.place22_twoLocalIdentifiers_XML);
+
+		List<DataGroup> identifiers = placeDataGroup.getAllGroupsWithNameInData("identifier");
+
+		assertCorrectIdentifierGroup(identifiers.get(0), "0", "waller", "1367");
+		assertCorrectIdentifierGroup(identifiers.get(1), "1", "waller", "666");
+	}
 }
