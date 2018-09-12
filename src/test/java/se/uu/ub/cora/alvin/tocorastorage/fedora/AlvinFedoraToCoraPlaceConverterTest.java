@@ -209,22 +209,6 @@ public class AlvinFedoraToCoraPlaceConverterTest {
 		assertEquals(country, "gaul");
 	}
 
-	// @Test
-	// public void convertFromXMLCountryAndHistoricCountry() {
-	// DataGroup placeDataGroup = converter
-	// .fromXML(TestDataProvider.place22_country_and_historicCountry_XML);
-	// assertEquals(placeDataGroup.getNameInData(), "authority");
-	// DataGroup recordInfo =
-	// placeDataGroup.getFirstGroupWithNameInData("recordInfo");
-	// assertEquals(recordInfo.getFirstAtomicValueWithNameInData("id"),
-	// "alvin-place:22_country_and_historic");
-	//
-	// String country = placeDataGroup.getFirstAtomicValueWithNameInData("country");
-	// assertEquals(country, "SE");
-	//
-	// assertFalse(placeDataGroup.containsChildWithNameInData("historicCountry"));
-	// }
-
 	@Test
 	public void convertFromXMLNoCoordinates() throws Exception {
 		DataGroup placeDataGroup = converter.fromXML(TestDataProvider.place24NoCoordinates);

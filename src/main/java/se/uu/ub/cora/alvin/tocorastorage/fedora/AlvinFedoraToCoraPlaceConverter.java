@@ -98,7 +98,8 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 	}
 
 	private void possiblyCreateCountryAndAddToPlace(DataGroup place) {
-		String alpha2Code = getStringFromDocumentUsingXPath("/place/country/alpha2Code/text()");
+		String alpha2Code = getStringFromDocumentUsingXPath(
+				"/place/country[@class='country']/alpha2Code/text()");
 		if (valueExists(alpha2Code)) {
 			createCountryAndAddToPlace(place, alpha2Code);
 		} else {
@@ -117,7 +118,7 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 
 	private void possiblyCreateHistoricCountryAndAddToPlace(DataGroup place) {
 		String historicCountryCode = getStringFromDocumentUsingXPath(
-				"/place/historicCountry/code/text()");
+				"/place/country[@class='historicCountry']/code/text()");
 		if (valueExists(historicCountryCode)) {
 			createHistoricCountryAndAddToPlace(place, historicCountryCode);
 		}
