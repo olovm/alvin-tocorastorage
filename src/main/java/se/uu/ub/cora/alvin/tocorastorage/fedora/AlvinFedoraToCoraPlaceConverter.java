@@ -101,6 +101,8 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 		String alpha2Code = getStringFromDocumentUsingXPath("/place/country/alpha2Code/text()");
 		if (valueExists(alpha2Code)) {
 			createCountryAndAddToPlace(place, alpha2Code);
+		} else {
+			possiblyCreateHistoricCountryAndAddToPlace(place);
 		}
 	}
 
@@ -111,6 +113,20 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 	private void createCountryAndAddToPlace(DataGroup place, String alpha2Code) {
 		DataAtomic country = DataAtomic.withNameInDataAndValue("country", alpha2Code);
 		place.addChild(country);
+	}
+
+	private void possiblyCreateHistoricCountryAndAddToPlace(DataGroup place) {
+		String historicCountryCode = getStringFromDocumentUsingXPath(
+				"/place/historicCountry/code/text()");
+		if (valueExists(historicCountryCode)) {
+			createHistoricCountryAndAddToPlace(place, historicCountryCode);
+		}
+	}
+
+	private void createHistoricCountryAndAddToPlace(DataGroup place, String historicCountryCode) {
+		DataAtomic historicCountry = DataAtomic.withNameInDataAndValue("historicCountry",
+				historicCountryCode);
+		place.addChild(historicCountry);
 	}
 
 	private void possiblyCreateAlternativeNamesAndAddToPlace(DataGroup place) {

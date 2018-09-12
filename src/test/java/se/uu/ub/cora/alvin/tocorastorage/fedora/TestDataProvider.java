@@ -506,4 +506,6 @@ public class TestDataProvider {
 			+ "        <unique>false</unique>\n" + "      </type>\n" + "      <text>873</text>\n"
 			+ "    </localIdentifier>\n" + "  </localIdentifiers>\n" + "</place>\n" + "";
 
+	public static String place22_historicCountry_XML = "";
+
 }
