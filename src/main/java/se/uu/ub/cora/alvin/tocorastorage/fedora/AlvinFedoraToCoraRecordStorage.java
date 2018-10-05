@@ -20,6 +20,7 @@ package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -28,6 +29,7 @@ import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
+import se.uu.ub.cora.spider.data.SpiderReadResult;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 
 public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
@@ -94,20 +96,26 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> readList(String type, DataGroup filter) {
+	public SpiderReadResult readList(String type, DataGroup filter) {
 		if (PLACE.equals(type)) {
 			return readAndConvertPlaceListFromFedora();
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
 	}
 
-	private Collection<DataGroup> readAndConvertPlaceListFromFedora() {
+	private SpiderReadResult readAndConvertPlaceListFromFedora() {
 		try {
-			return tryReadAndConvertPlaceListFromFedora();
+			return tryCreateSpiderReadResultFromReadingAndConvertingPlaceListInFedora();
 		} catch (Exception e) {
 			throw ReadFedoraException
-					.withMessageAndException("Unable to read list of places: " + e.getMessage(), e);
+				.withMessageAndException("Unable to read list of places: " + e.getMessage(), e);
 		}
+	}
+
+	private SpiderReadResult tryCreateSpiderReadResultFromReadingAndConvertingPlaceListInFedora() {
+		SpiderReadResult spiderReadResult = new SpiderReadResult();
+		spiderReadResult.listOfDataGroups = (List) tryReadAndConvertPlaceListFromFedora();
+		return spiderReadResult;
 	}
 
 	private Collection<DataGroup> tryReadAndConvertPlaceListFromFedora() {
@@ -132,7 +140,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private NodeList extractNodeListWithPidsFromXML(String placeListXML) {
 		XMLXPathParser parser = XMLXPathParser.forXML(placeListXML);
 		return parser
-				.getNodeListFromDocumentUsingXPath("/result/resultList/objectFields/pid/text()");
+			.getNodeListFromDocumentUsingXPath("/result/resultList/objectFields/pid/text()");
 	}
 
 	private Collection<DataGroup> constructCollectionOfPlacesFromFedora(NodeList list) {
@@ -146,7 +154,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> readAbstractList(String type, DataGroup filter) {
+	public SpiderReadResult readAbstractList(String type, DataGroup filter) {
 		throw NotImplementedException.withMessage("readAbstractList is not implemented");
 	}
 
@@ -158,7 +166,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	@Override
 	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
 		throw NotImplementedException
-				.withMessage("generateLinkCollectionPointingToRecord is not implemented");
+			.withMessage("generateLinkCollectionPointingToRecord is not implemented");
 	}
 
 	@Override

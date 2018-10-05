@@ -26,6 +26,7 @@ import java.util.Map;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
+import se.uu.ub.cora.spider.data.SpiderReadResult;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 import se.uu.ub.cora.sqldatabase.RecordReader;
 import se.uu.ub.cora.sqldatabase.RecordReaderFactory;
@@ -91,21 +92,29 @@ public final class AlvinDbToCoraRecordStorage implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> readList(String type, DataGroup filter) {
+	public SpiderReadResult readList(String type, DataGroup filter) {
 		if (COUNTRY.equals(type)) {
 			return readAllFromDbAndConvertToDataGroup(type);
 		}
 		throw NotImplementedException.withMessage("readList is not implemented for type: " + type);
 	}
 
-	private Collection<DataGroup> readAllFromDbAndConvertToDataGroup(String type) {
+	private SpiderReadResult readAllFromDbAndConvertToDataGroup(String type) {
 		List<Map<String, String>> readAllFromTable = readAllFromDb(type);
-		return convertListOfMapsFromDbToDataGroups(type, readAllFromTable);
+		return createSpiderReadResultFromDbData(type, readAllFromTable);
 	}
 
 	private List<Map<String, String>> readAllFromDb(String type) {
 		RecordReader recordReader = recordReaderFactory.factor();
 		return recordReader.readAllFromTable(type);
+	}
+
+	private SpiderReadResult createSpiderReadResultFromDbData(String type,
+			List<Map<String, String>> readAllFromTable) {
+		SpiderReadResult spiderReadResult = new SpiderReadResult();
+		spiderReadResult.listOfDataGroups = convertListOfMapsFromDbToDataGroups(type,
+				readAllFromTable);
+		return spiderReadResult;
 	}
 
 	private List<DataGroup> convertListOfMapsFromDbToDataGroups(String type,
@@ -124,7 +133,7 @@ public final class AlvinDbToCoraRecordStorage implements RecordStorage {
 	}
 
 	@Override
-	public Collection<DataGroup> readAbstractList(String type, DataGroup filter) {
+	public SpiderReadResult readAbstractList(String type, DataGroup filter) {
 		throw NotImplementedException.withMessage("readAbstractList is not implemented");
 	}
 
@@ -136,7 +145,7 @@ public final class AlvinDbToCoraRecordStorage implements RecordStorage {
 	@Override
 	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
 		throw NotImplementedException
-				.withMessage("generateLinkCollectionPointingToRecord is not implemented");
+			.withMessage("generateLinkCollectionPointingToRecord is not implemented");
 	}
 
 	@Override

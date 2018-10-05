@@ -42,7 +42,7 @@ public class AlvinDbToCoraRecordStorageTest {
 		converterFactory = new AlvinDbToCoraConverterFactorySpy();
 		recordReaderFactory = new RecordReaderFactorySpy();
 		alvinToCoraRecordStorage = AlvinDbToCoraRecordStorage
-				.usingRecordReaderFactoryAndConverterFactory(recordReaderFactory, converterFactory);
+			.usingRecordReaderFactoryAndConverterFactory(recordReaderFactory, converterFactory);
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class AlvinDbToCoraRecordStorageTest {
 		alvinToCoraRecordStorage.read("country", "someId");
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
-				.get(0);
+			.get(0);
 		assertNotNull(alvinDbToCoraConverter.mapToConvert);
 		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
 	}
@@ -104,7 +104,7 @@ public class AlvinDbToCoraRecordStorageTest {
 		DataGroup readCountry = alvinToCoraRecordStorage.read("country", "someId");
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
-				.get(0);
+			.get(0);
 		assertEquals(recordReader.returnedList.size(), 1);
 		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
 		assertEquals(readCountry, alvinDbToCoraConverter.convertedDbDataGroup);
@@ -165,18 +165,18 @@ public class AlvinDbToCoraRecordStorageTest {
 		alvinToCoraRecordStorage.readList("country", DataGroup.withNameInData("filter"));
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
-				.get(0);
+			.get(0);
 		assertNotNull(alvinDbToCoraConverter.mapToConvert);
 		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
 	}
 
 	@Test
 	public void testReadCountryListConverteredIsAddedToList() throws Exception {
-		List<DataGroup> readCountryList = (List<DataGroup>) alvinToCoraRecordStorage
-				.readList("country", DataGroup.withNameInData("filter"));
+		List<DataGroup> readCountryList = alvinToCoraRecordStorage.readList("country",
+				DataGroup.withNameInData("filter")).listOfDataGroups;
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
-				.get(0);
+			.get(0);
 		assertEquals(recordReader.returnedList.size(), 1);
 		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
 		assertEquals(readCountryList.get(0), alvinDbToCoraConverter.convertedDbDataGroup);
@@ -185,24 +185,24 @@ public class AlvinDbToCoraRecordStorageTest {
 	@Test
 	public void testReadCountryListConverteredMoreThanOneIsAddedToList() throws Exception {
 		recordReaderFactory.noOfRecordsToReturn = 3;
-		List<DataGroup> readCountryList = (List<DataGroup>) alvinToCoraRecordStorage
-				.readList("country", DataGroup.withNameInData("filter"));
+		List<DataGroup> readCountryList = alvinToCoraRecordStorage.readList("country",
+				DataGroup.withNameInData("filter")).listOfDataGroups;
 		RecordReaderSpy recordReader = recordReaderFactory.factored;
 
 		assertEquals(recordReader.returnedList.size(), 3);
 
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
-				.get(0);
+			.get(0);
 		assertEquals(recordReader.returnedList.get(0), alvinDbToCoraConverter.mapToConvert);
 		assertEquals(readCountryList.get(0), alvinDbToCoraConverter.convertedDbDataGroup);
 
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter2 = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
-				.get(1);
+			.get(1);
 		assertEquals(recordReader.returnedList.get(1), alvinDbToCoraConverter2.mapToConvert);
 		assertEquals(readCountryList.get(1), alvinDbToCoraConverter2.convertedDbDataGroup);
 
 		AlvinDbToCoraConverterSpy alvinDbToCoraConverter3 = (AlvinDbToCoraConverterSpy) converterFactory.factoredConverters
-				.get(2);
+			.get(2);
 		assertEquals(recordReader.returnedList.get(2), alvinDbToCoraConverter3.mapToConvert);
 		assertEquals(readCountryList.get(2), alvinDbToCoraConverter3.convertedDbDataGroup);
 
