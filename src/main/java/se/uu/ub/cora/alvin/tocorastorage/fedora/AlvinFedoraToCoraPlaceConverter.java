@@ -22,6 +22,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import se.uu.ub.cora.alvin.tocorastorage.ParseException;
+import se.uu.ub.cora.alvin.tocorastorage.TextUtil;
 import se.uu.ub.cora.bookkeeper.data.DataAtomic;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
@@ -125,9 +126,15 @@ public class AlvinFedoraToCoraPlaceConverter implements AlvinFedoraToCoraConvert
 	}
 
 	private void createHistoricCountryAndAddToPlace(DataGroup place, String historicCountryCode) {
+		String modifiedCodeString = removeNonAlpahbeticCharacters(historicCountryCode);
 		DataAtomic historicCountry = DataAtomic.withNameInDataAndValue("historicCountry",
-				historicCountryCode);
+				modifiedCodeString);
 		place.addChild(historicCountry);
+	}
+
+	private String removeNonAlpahbeticCharacters(String code) {
+		String normalizedString = TextUtil.normalizeString(code);
+		return TextUtil.turnStringIntoCamelCase(normalizedString);
 	}
 
 	private void possiblyCreateAlternativeNamesAndAddToPlace(DataGroup place) {
