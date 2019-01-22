@@ -108,13 +108,13 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 			return tryCreateSpiderReadResultFromReadingAndConvertingPlaceListInFedora();
 		} catch (Exception e) {
 			throw ReadFedoraException
-				.withMessageAndException("Unable to read list of places: " + e.getMessage(), e);
+					.withMessageAndException("Unable to read list of places: " + e.getMessage(), e);
 		}
 	}
 
 	private SpiderReadResult tryCreateSpiderReadResultFromReadingAndConvertingPlaceListInFedora() {
 		SpiderReadResult spiderReadResult = new SpiderReadResult();
-		spiderReadResult.listOfDataGroups = (List) tryReadAndConvertPlaceListFromFedora();
+		spiderReadResult.listOfDataGroups = (List<DataGroup>) tryReadAndConvertPlaceListFromFedora();
 		return spiderReadResult;
 	}
 
@@ -140,7 +140,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private NodeList extractNodeListWithPidsFromXML(String placeListXML) {
 		XMLXPathParser parser = XMLXPathParser.forXML(placeListXML);
 		return parser
-			.getNodeListFromDocumentUsingXPath("/result/resultList/objectFields/pid/text()");
+				.getNodeListFromDocumentUsingXPath("/result/resultList/objectFields/pid/text()");
 	}
 
 	private Collection<DataGroup> constructCollectionOfPlacesFromFedora(NodeList list) {
@@ -166,7 +166,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	@Override
 	public Collection<DataGroup> generateLinkCollectionPointingToRecord(String type, String id) {
 		throw NotImplementedException
-			.withMessage("generateLinkCollectionPointingToRecord is not implemented");
+				.withMessage("generateLinkCollectionPointingToRecord is not implemented");
 	}
 
 	@Override
