@@ -46,9 +46,11 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		this.baseURL = baseURL;
 	}
 
-	public static AlvinFedoraToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(
+	// usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURLAndFedoraUsernameAndFedoraPassword
+	public static AlvinFedoraToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURLAndFedoraUsernameAndFedoraPassword(
 			HttpHandlerFactory httpHandlerFactory,
-			AlvinFedoraToCoraConverterFactory converterFactory, String baseURL) {
+			AlvinFedoraToCoraConverterFactory converterFactory, String baseURL,
+			String fedoraUsername, String fedoraPassword) {
 		return new AlvinFedoraToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL);
 	}
 
@@ -92,7 +94,42 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	@Override
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		throw NotImplementedException.withMessage("update is not implemented");
+		// throw NotImplementedException.withMessage("update is not implemented");
+		// id = "alvin-place:22";
+		String dsLabel = "labelFromCora";
+		String url = baseURL + "objects/" + id + "/datastreams/METADATA?format=?xml&controlGroup=M"
+				+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=" + dsLabel;
+		// String encoded = Base64.getEncoder()
+		// .encodeToString(("fedoraAdmin:changeit").getBytes(StandardCharsets.UTF_8));
+		HttpHandler httpHandler = httpHandlerFactory.factor(url);
+		// httpHandler.setRequestProperty("Authorization", "Basic " + encoded);
+		//
+		// httpHandler.setRequestMethod("PUT");
+		// httpHandler.setOutput(
+		// "<place id=\"1\"><pid>alvin-place:22</pid><dsId>METADATA</dsId><recordInfo
+		// id=\"2\"><externalDs>false</externalDs><lastAction>UPDATED</lastAction><created
+		// id=\"3\"><date id=\"4\">2014-12-18 20:20:38.346 UTC</date><dateInStorage
+		// id=\"5\">2014-12-18 20:20:39.815 UTC</dateInStorage><user class=\"seamUser\"
+		// id=\"6\"><lastUpdated class=\"sql-timestamp\" id=\"7\">2014-04-17
+		// 08:12:52.806</lastUpdated><id>1</id><userId>test</userId><domain>uu</domain><firstName>Test</firstName><lastName>Testsson</lastName><email>test.testsson@ub.uu.se</email></user><note>Place
+		// created through web gui</note><type>CREATED</type></created><updated
+		// id=\"8\"><userAction reference=\"3\"/><userAction id=\"9\"><date
+		// id=\"10\">2014-12-18 20:21:20.880 UTC</date><user class=\"seamUser\"
+		// id=\"11\"><lastUpdated class=\"sql-timestamp\" id=\"12\">2014-04-17
+		// 08:12:52.806</lastUpdated><id>1</id><userId>test</userId><domain>uu</domain><firstName>Test</firstName><lastName>Testsson</lastName><email>test.testsson@ub.uu.se</email></user><note>Place
+		// updated through web
+		// gui</note><type>UPDATED</type></userAction></updated></recordInfo><country
+		// class=\"country\"><lastUpdated class=\"sql-timestamp\" id=\"14\">2014-04-17
+		// 08:12:48.8</lastUpdated><defaultName>Sverige</defaultName><localisedNames
+		// id=\"15\"><entry><string>en</string><string>Sweden</string></entry></localisedNames><alpha2Code>SE</alpha2Code><alpha3Code>SWE</alpha3Code><numericalCode>752</numericalCode><marcCode>sw</marcCode></country><regions
+		// id=\"16\"/><defaultPlaceName id=\"17\"><deleted>false</deleted>"
+		// + "<name>Linköping from Cora7</name></defaultPlaceName>"
+		// + "<placeNameForms id=\"18\"/><identifiers/><localIdentifiers
+		// id=\"19\"><localIdentifier><type class=\"localIdentifierType\"><lastUpdated
+		// class=\"sql-timestamp\">2014-04-17
+		// 08:49:50.65</lastUpdated><defaultName>Waller-id</defaultName><localisedNames/><code>waller</code><id>114</id><internal>false</internal><organisationUnitId>2</organisationUnitId></type><text>1367</text></localIdentifier></localIdentifiers><longitude>15.62</longitude><latitude>58.42</latitude></place>");
+		// int responseCode = httpHandler.getResponseCode();
+		// int trams = responseCode;
 	}
 
 	@Override
@@ -126,7 +163,8 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 
 	private String getPlaceListXMLFromFedora() {
 		HttpHandler httpHandler = createHttpHandlerForPlaceList();
-		return httpHandler.getResponseText();
+		String responseText = httpHandler.getResponseText();
+		return responseText;
 	}
 
 	private HttpHandler createHttpHandlerForPlaceList() {

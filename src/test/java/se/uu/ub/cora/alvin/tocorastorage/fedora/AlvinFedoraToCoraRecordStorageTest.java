@@ -29,6 +29,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
+import se.uu.ub.cora.bookkeeper.data.DataAtomic;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.spider.record.storage.RecordStorage;
 
@@ -37,14 +38,17 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	private HttpHandlerFactorySpy httpHandlerFactory;
 	private AlvinFedoraToCoraConverterFactorySpy converterFactory;
 	private String baseURL = "http://alvin-cora-fedora:8088/fedora/";
+	private String fedoraUsername = "fedoraUser";
+	private String fedoraPassword = "fedoraPassword";
 
 	@BeforeMethod
 	public void BeforeMethod() {
 		httpHandlerFactory = new HttpHandlerFactorySpy();
 		converterFactory = new AlvinFedoraToCoraConverterFactorySpy();
 		alvinToCoraRecordStorage = AlvinFedoraToCoraRecordStorage
-			.usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(httpHandlerFactory,
-					converterFactory, baseURL);
+				.usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURLAndFedoraUsernameAndFedoraPassword(
+						httpHandlerFactory, converterFactory, baseURL, fedoraUsername,
+						fedoraPassword);
 	}
 
 	@Test
@@ -71,13 +75,13 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				baseURL + "objects/alvin-place:22/datastreams/METADATA/content");
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
 		HttpHandlerSpy httpHandler = (HttpHandlerSpy) httpHandlerFactory.factoredHttpHandlers
-			.get(0);
+				.get(0);
 		assertEquals(httpHandler.requestMetod, "GET");
 
 		assertEquals(converterFactory.factoredConverters.size(), 1);
 		assertEquals(converterFactory.factoredTypes.get(0), "place");
 		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredConverters
-			.get(0);
+				.get(0);
 		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
 		assertEquals(readPlace, alvinToCoraConverter.convertedDataGroup);
 	}
@@ -100,10 +104,51 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		alvinToCoraRecordStorage.linksExistForRecord(null, null);
 	}
 
-	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
-			+ "update is not implemented")
-	public void updateThrowsNotImplementedException() throws Exception {
-		alvinToCoraRecordStorage.update(null, null, null, null, null, null);
+	// @Test(expectedExceptions = NotImplementedException.class,
+	// expectedExceptionsMessageRegExp = ""
+	// + "update is not implemented")
+	// public void updateThrowsNotImplementedException() throws Exception {
+	// alvinToCoraRecordStorage.update(null, null, null, null, null, null);
+	// }
+	@Test
+	public void updateUpdatesRecordInStoragesName() throws Exception {
+		httpHandlerFactory.responseText = "Dummy response text";
+		DataGroup record = DataGroup.withNameInData("authority");
+		record.addAttributeByIdWithValue("type", "place");
+
+		DataGroup authorizedNameGroup = DataGroup.withNameInData("name");
+		record.addChild(authorizedNameGroup);
+		authorizedNameGroup.addAttributeByIdWithValue("type", "authorized");
+
+		DataGroup defaultNameGroup = DataGroup.withNameInData("namePart");
+		authorizedNameGroup.addChild(defaultNameGroup);
+		defaultNameGroup.addAttributeByIdWithValue("type", "defaultName");
+
+		DataAtomic defaultNameValue = DataAtomic.withNameInDataAndValue("value", "SomePlaceName");
+		defaultNameGroup.addChild(defaultNameValue);
+
+		DataGroup collectedTerms = null;
+		DataGroup linkList = null;
+		String dataDivider = null;
+		alvinToCoraRecordStorage.update("place", "alvin-place:22", record, collectedTerms, linkList,
+				dataDivider);
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
+		assertEquals(httpHandlerFactory.urls.get(0),
+				baseURL + "objects/alvin-place:22/datastreams/METADATA?format=?xml&controlGroup=M"
+						+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=SomePlaceName");
+
+		// HttpHandlerSpy httpHandler = (HttpHandlerSpy)
+		// httpHandlerFactory.factoredHttpHandlers
+		// .get(0);
+		// assertEquals(httpHandler.requestMetod, "GET");
+		//
+		// assertEquals(converterFactory.factoredConverters.size(), 1);
+		// assertEquals(converterFactory.factoredTypes.get(0), "place");
+		// AlvinFedoraToCoraConverterSpy alvinToCoraConverter =
+		// (AlvinFedoraToCoraConverterSpy) converterFactory.factoredConverters
+		// .get(0);
+		// assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
+		// assertEquals(readPlace, alvinToCoraConverter.convertedDataGroup);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -129,7 +174,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				+ "objects?pid=true&maxResults=100&resultFormat=xml&query=pid%7Ealvin-place:*");
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 7);
 		HttpHandlerSpy httpHandler = (HttpHandlerSpy) httpHandlerFactory.factoredHttpHandlers
-			.get(0);
+				.get(0);
 		assertEquals(httpHandler.requestMetod, "GET");
 
 		assertEquals(httpHandlerFactory.urls.get(1),
@@ -148,7 +193,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(converterFactory.factoredConverters.size(), 6);
 		assertEquals(converterFactory.factoredTypes.get(0), "place");
 		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredConverters
-			.get(0);
+				.get(0);
 		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
 		assertEquals(readPlaceList.size(), 6);
 		Iterator<DataGroup> readPlaceIterator = readPlaceList.iterator();
