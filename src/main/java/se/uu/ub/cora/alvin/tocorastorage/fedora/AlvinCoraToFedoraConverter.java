@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,24 +16,11 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
+import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
-public class AlvinFedoraToCoraConverterFactoryImp implements AlvinConverterFactory {
-
-	@Override
-	public AlvinFedoraToCoraConverter factorToCoraConverter(String type) {
-		if ("place".equals(type)) {
-			return new AlvinFedoraToCoraPlaceConverter();
-		}
-		throw NotImplementedException.withMessage("No converter implemented for: " + type);
-	}
-
-	@Override
-	public AlvinCoraToFedoraConverter factorToFedoraConverter(String type) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+public interface AlvinCoraToFedoraConverter {
+	public String toXML(DataGroup record);
 }

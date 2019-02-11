@@ -18,22 +18,9 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
+public interface AlvinConverterFactory {
 
-public class AlvinFedoraToCoraConverterFactoryImp implements AlvinConverterFactory {
+	AlvinFedoraToCoraConverter factorToCoraConverter(String type);
 
-	@Override
-	public AlvinFedoraToCoraConverter factorToCoraConverter(String type) {
-		if ("place".equals(type)) {
-			return new AlvinFedoraToCoraPlaceConverter();
-		}
-		throw NotImplementedException.withMessage("No converter implemented for: " + type);
-	}
-
-	@Override
-	public AlvinCoraToFedoraConverter factorToFedoraConverter(String type) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	AlvinCoraToFedoraConverter factorToFedoraConverter(String type);
 }

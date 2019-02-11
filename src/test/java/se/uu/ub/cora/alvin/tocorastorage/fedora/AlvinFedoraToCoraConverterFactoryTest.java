@@ -25,12 +25,12 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
 import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverter;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverterFactory;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinConverterFactory;
 import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverterFactoryImp;
 import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraPlaceConverter;
 
 public class AlvinFedoraToCoraConverterFactoryTest {
-	private AlvinFedoraToCoraConverterFactory alvinToCoraConverterFactoryImp;
+	private AlvinConverterFactory alvinToCoraConverterFactoryImp;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -40,12 +40,12 @@ public class AlvinFedoraToCoraConverterFactoryTest {
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "No converter implemented for: someType")
 	public void factorUnknownTypeThrowsException() throws Exception {
-		alvinToCoraConverterFactoryImp.factor("someType");
+		alvinToCoraConverterFactoryImp.factorToCoraConverter("someType");
 	}
 
 	@Test
 	public void testFactoryPlace() throws Exception {
-		AlvinFedoraToCoraConverter converter = alvinToCoraConverterFactoryImp.factor("place");
+		AlvinFedoraToCoraConverter converter = alvinToCoraConverterFactoryImp.factorToCoraConverter("place");
 		assertTrue(converter instanceof AlvinFedoraToCoraPlaceConverter);
 	}
 }

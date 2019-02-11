@@ -20,8 +20,11 @@ package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -78,9 +81,9 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				.get(0);
 		assertEquals(httpHandler.requestMetod, "GET");
 
-		assertEquals(converterFactory.factoredConverters.size(), 1);
-		assertEquals(converterFactory.factoredTypes.get(0), "place");
-		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredConverters
+		assertEquals(converterFactory.factoredToCoraConverters.size(), 1);
+		assertEquals(converterFactory.factoredToCoraTypes.get(0), "place");
+		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredToCoraConverters
 				.get(0);
 		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
 		assertEquals(readPlace, alvinToCoraConverter.convertedDataGroup);
@@ -104,51 +107,88 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		alvinToCoraRecordStorage.linksExistForRecord(null, null);
 	}
 
-	// @Test(expectedExceptions = NotImplementedException.class,
-	// expectedExceptionsMessageRegExp = ""
-	// + "update is not implemented")
-	// public void updateThrowsNotImplementedException() throws Exception {
-	// alvinToCoraRecordStorage.update(null, null, null, null, null, null);
-	// }
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "update is not implemented for type: someNotImplementedType")
+	public void updateThrowsNotImplementedException() throws Exception {
+		alvinToCoraRecordStorage.update("someNotImplementedType", null, null, null, null, null);
+	}
+
 	@Test
 	public void updateUpdatesRecordInStoragesName() throws Exception {
 		httpHandlerFactory.responseText = "Dummy response text";
 		DataGroup record = DataGroup.withNameInData("authority");
-		record.addAttributeByIdWithValue("type", "place");
 
-		DataGroup authorizedNameGroup = DataGroup.withNameInData("name");
-		record.addChild(authorizedNameGroup);
-		authorizedNameGroup.addAttributeByIdWithValue("type", "authorized");
+		DataGroup collectedTerms = DataGroup.withNameInData("collectedData");
+		collectedTerms.addChild(DataAtomic.withNameInDataAndValue("type", "place"));
+		collectedTerms.addChild(DataAtomic.withNameInDataAndValue("id", "alvin-place:22"));
 
-		DataGroup defaultNameGroup = DataGroup.withNameInData("namePart");
-		authorizedNameGroup.addChild(defaultNameGroup);
-		defaultNameGroup.addAttributeByIdWithValue("type", "defaultName");
+		DataGroup storageTerms = DataGroup.withNameInData("storage");
+		collectedTerms.addChild(storageTerms);
 
-		DataAtomic defaultNameValue = DataAtomic.withNameInDataAndValue("value", "SomePlaceName");
-		defaultNameGroup.addChild(defaultNameValue);
+		DataGroup collectedRecordLabel = DataGroup.withNameInData("collectedDataTerm");
+		storageTerms.addChild(collectedRecordLabel);
+		collectedRecordLabel.setRepeatId("someRepeatId");
+		collectedRecordLabel.addChild(
+				DataAtomic.withNameInDataAndValue("collectTermId", "recordLabelStorageTerm"));
+		collectedRecordLabel.addChild(
+				DataAtomic.withNameInDataAndValue("collectTermValue", "SomePlaceCollectedName"));
 
-		DataGroup collectedTerms = null;
 		DataGroup linkList = null;
 		String dataDivider = null;
+
 		alvinToCoraRecordStorage.update("place", "alvin-place:22", record, collectedTerms, linkList,
 				dataDivider);
-		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
-		assertEquals(httpHandlerFactory.urls.get(0),
-				baseURL + "objects/alvin-place:22/datastreams/METADATA?format=?xml&controlGroup=M"
-						+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=SomePlaceName");
 
-		// HttpHandlerSpy httpHandler = (HttpHandlerSpy)
-		// httpHandlerFactory.factoredHttpHandlers
-		// .get(0);
-		// assertEquals(httpHandler.requestMetod, "GET");
-		//
-		// assertEquals(converterFactory.factoredConverters.size(), 1);
-		// assertEquals(converterFactory.factoredTypes.get(0), "place");
-		// AlvinFedoraToCoraConverterSpy alvinToCoraConverter =
-		// (AlvinFedoraToCoraConverterSpy) converterFactory.factoredConverters
-		// .get(0);
-		// assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
-		// assertEquals(readPlace, alvinToCoraConverter.convertedDataGroup);
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
+		assertEquals(httpHandlerFactory.urls.get(0), baseURL
+				+ "objects/alvin-place:22/datastreams/METADATA?format=?xml&controlGroup=M"
+				+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=SomePlaceCollectedName");
+
+		HttpHandlerSpy httpHandler = (HttpHandlerSpy) httpHandlerFactory.factoredHttpHandlers
+				.get(0);
+		assertEquals(httpHandler.requestMetod, "PUT");
+		String encoded = Base64.getEncoder().encodeToString(
+				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
+		assertEquals(httpHandler.requestProperties.get("Authorization"), "Basic " + encoded);
+
+		assertEquals(converterFactory.factoredToFedoraConverters.size(), 1);
+		assertEquals(converterFactory.factoredToFedoraTypes.get(0), "place");
+		AlvinCoraToFedoraConverterSpy converterSpy = (AlvinCoraToFedoraConverterSpy) converterFactory.factoredToFedoraConverters
+				.get(0);
+		assertSame(converterSpy.record, record);
+		assertEquals(converterSpy.returnedXML, httpHandler.outputStrings.get(0));
+	}
+
+	@Test
+	public void updateIsMissingRecordLabelInCollectedStorageTerms() throws Exception {
+		httpHandlerFactory.responseText = "Dummy response text";
+		DataGroup record = DataGroup.withNameInData("authority");
+
+		DataGroup collectedTerms = DataGroup.withNameInData("collectedData");
+		collectedTerms.addChild(DataAtomic.withNameInDataAndValue("type", "place"));
+		collectedTerms.addChild(DataAtomic.withNameInDataAndValue("id", "alvin-place:22"));
+
+		DataGroup storageTerms = DataGroup.withNameInData("storage");
+		collectedTerms.addChild(storageTerms);
+
+		DataGroup collectedRecordLabel = DataGroup.withNameInData("collectedDataTerm");
+		storageTerms.addChild(collectedRecordLabel);
+		collectedRecordLabel.setRepeatId("someRepeatId");
+		collectedRecordLabel.addChild(
+				DataAtomic.withNameInDataAndValue("collectTermId", "NOTrecordLabelStorageTerm"));
+		collectedRecordLabel.addChild(
+				DataAtomic.withNameInDataAndValue("collectTermValue", "SomePlaceCollectedName"));
+
+		DataGroup linkList = null;
+		String dataDivider = null;
+
+		alvinToCoraRecordStorage.update("place", "alvin-place:22", record, collectedTerms, linkList,
+				dataDivider);
+
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
+		assertEquals(httpHandlerFactory.urls.get(0), baseURL
+				+ "objects/alvin-place:22/datastreams/METADATA?format=?xml&controlGroup=M"
+				+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=LabelNotPresentInStorageTerms");
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -190,9 +230,9 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(httpHandlerFactory.urls.get(6),
 				baseURL + "objects/alvin-place:1684/datastreams/METADATA/content");
 
-		assertEquals(converterFactory.factoredConverters.size(), 6);
-		assertEquals(converterFactory.factoredTypes.get(0), "place");
-		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredConverters
+		assertEquals(converterFactory.factoredToCoraConverters.size(), 6);
+		assertEquals(converterFactory.factoredToCoraTypes.get(0), "place");
+		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredToCoraConverters
 				.get(0);
 		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
 		assertEquals(readPlaceList.size(), 6);
