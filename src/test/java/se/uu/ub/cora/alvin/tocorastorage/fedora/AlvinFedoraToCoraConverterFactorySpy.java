@@ -21,7 +21,7 @@ package se.uu.ub.cora.alvin.tocorastorage.fedora;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlvinFedoraToCoraConverterFactorySpy implements AlvinConverterFactory {
+public class AlvinFedoraToCoraConverterFactorySpy implements AlvinFedoraConverterFactory {
 
 	List<AlvinFedoraToCoraConverter> factoredToCoraConverters = new ArrayList<>();
 	List<String> factoredToCoraTypes = new ArrayList<>();

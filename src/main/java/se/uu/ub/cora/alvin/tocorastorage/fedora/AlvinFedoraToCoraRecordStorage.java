@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -41,12 +41,12 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private static final String PLACE = "place";
 	private HttpHandlerFactory httpHandlerFactory;
 	private String baseURL;
-	private AlvinConverterFactory converterFactory;
+	private AlvinFedoraConverterFactory converterFactory;
 	private String fedoraUsername;
 	private String fedoraPassword;
 
 	private AlvinFedoraToCoraRecordStorage(HttpHandlerFactory httpHandlerFactory,
-			AlvinConverterFactory converterFactory, String baseURL, String fedoraUsername,
+			AlvinFedoraConverterFactory converterFactory, String baseURL, String fedoraUsername,
 			String fedoraPassword) {
 		this.httpHandlerFactory = httpHandlerFactory;
 		this.converterFactory = converterFactory;
@@ -56,7 +56,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	}
 
 	public static AlvinFedoraToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURLAndFedoraUsernameAndFedoraPassword(
-			HttpHandlerFactory httpHandlerFactory, AlvinConverterFactory converterFactory,
+			HttpHandlerFactory httpHandlerFactory, AlvinFedoraConverterFactory converterFactory,
 			String baseURL, String fedoraUsername, String fedoraPassword) {
 		return new AlvinFedoraToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL,
 				fedoraUsername, fedoraPassword);
@@ -204,8 +204,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 
 	private String getPlaceListXMLFromFedora() {
 		HttpHandler httpHandler = createHttpHandlerForPlaceList();
-		String responseText = httpHandler.getResponseText();
-		return responseText;
+		return httpHandler.getResponseText();
 	}
 
 	private HttpHandler createHttpHandlerForPlaceList() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,23 +18,23 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverter;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinConverterFactory;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverterFactoryImp;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraPlaceConverter;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 
 public class AlvinFedoraToCoraConverterFactoryTest {
-	private AlvinConverterFactory alvinToCoraConverterFactoryImp;
+	private AlvinFedoraToCoraConverterFactoryImp alvinToCoraConverterFactoryImp;
+	private String fedoraURL = "someFedoraURL";
 
 	@BeforeMethod
 	public void beforeMethod() {
-		alvinToCoraConverterFactoryImp = new AlvinFedoraToCoraConverterFactoryImp();
+		alvinToCoraConverterFactoryImp = AlvinFedoraToCoraConverterFactoryImp
+				.usingFedoraURL(fedoraURL);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -45,7 +45,34 @@ public class AlvinFedoraToCoraConverterFactoryTest {
 
 	@Test
 	public void testFactoryPlace() throws Exception {
-		AlvinFedoraToCoraConverter converter = alvinToCoraConverterFactoryImp.factorToCoraConverter("place");
+		AlvinFedoraToCoraConverter converter = alvinToCoraConverterFactoryImp
+				.factorToCoraConverter("place");
 		assertTrue(converter instanceof AlvinFedoraToCoraPlaceConverter);
+	}
+
+	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
+			+ "No to Fedora converter implemented for: someUnknownType")
+	public void testFactorToFedoraConverterUnkownTypeThrowsException() throws Exception {
+		alvinToCoraConverterFactoryImp.factorToFedoraConverter("someUnknownType");
+	}
+
+	@Test
+	public void testFactorToFedoraForPlaceIsInstanceOfCorrectType() throws Exception {
+		AlvinCoraToFedoraConverter converter = alvinToCoraConverterFactoryImp
+				.factorToFedoraConverter("place");
+		assertTrue(converter instanceof AlvinCoraToFedoraPlaceConverter);
+	}
+
+	@Test
+	public void testFactorToFedoraForPlaceHasCorrectDependencies() throws Exception {
+		AlvinCoraToFedoraPlaceConverter converter = (AlvinCoraToFedoraPlaceConverter) alvinToCoraConverterFactoryImp
+				.factorToFedoraConverter("place");
+		assertTrue(converter.getHttpHandlerFactory() instanceof HttpHandlerFactoryImp);
+		assertEquals(converter.getFedorURL(), fedoraURL);
+	}
+
+	@Test
+	public void testGetFedoraURLNeededForTests() throws Exception {
+		assertEquals(alvinToCoraConverterFactoryImp.getFedoraURL(), fedoraURL);
 	}
 }

@@ -29,35 +29,44 @@ import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConverter {
 
 	private HttpHandlerFactory httpHandlerFactory;
-	private static String fedoraURL;
+	private String fedoraURL;
 	private XMLXPathParser parser;
 
 	public static AlvinCoraToFedoraPlaceConverter usingHttpHandlerFactoryAndFedoraUrl(
 			HttpHandlerFactory httpHandlerFactory, String fedoraURL) {
-		AlvinCoraToFedoraPlaceConverter.fedoraURL = fedoraURL;
-		return new AlvinCoraToFedoraPlaceConverter(httpHandlerFactory);
+		return new AlvinCoraToFedoraPlaceConverter(httpHandlerFactory, fedoraURL);
 	}
 
-	private AlvinCoraToFedoraPlaceConverter(HttpHandlerFactory httpHandlerFactory) {
+	private AlvinCoraToFedoraPlaceConverter(HttpHandlerFactory httpHandlerFactory,
+			String fedoraURL) {
 		this.httpHandlerFactory = httpHandlerFactory;
+		this.fedoraURL = fedoraURL;
 	}
 
 	@Override
 	public String toXML(DataGroup record) {
 		String recordId = getIdFromRecord(record);
+		String fedoraXML = getXMLForRecordFromFedora(recordId);
+		parser = XMLXPathParser.forXML(fedoraXML);
+		convertDefaultName(record);
+		return parser.getDocumentAsString("/");
+	}
+
+	private String getXMLForRecordFromFedora(String recordId) {
 		String url = fedoraURL + "objects/" + recordId + "/datastreams/METADATA/content";
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);
 		httpHandler.setRequestMethod("GET");
-		String fedoraXML = httpHandler.getResponseText();
-		parser = XMLXPathParser.forXML(fedoraXML);
-		String defaultNameFromPlaceRecord = getDefaultNameFromPlaceRecord(record);
-		setStringFromDocumentUsingXPath("/place/defaultPlaceName/name", defaultNameFromPlaceRecord);
-		return parser.getDocumentAsString("/");
+		return httpHandler.getResponseText();
 	}
 
 	private String getIdFromRecord(DataGroup record) {
 		DataGroup recordInfo = record.getFirstGroupWithNameInData("recordInfo");
 		return recordInfo.getFirstAtomicValueWithNameInData("id");
+	}
+
+	private void convertDefaultName(DataGroup record) {
+		String defaultNameFromPlaceRecord = getDefaultNameFromPlaceRecord(record);
+		setStringFromDocumentUsingXPath("/place/defaultPlaceName/name", defaultNameFromPlaceRecord);
 	}
 
 	private void setStringFromDocumentUsingXPath(String xpathString, String newValue) {
@@ -72,6 +81,16 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 				"namePart", DataAttribute.withNameInDataAndValue("type", "defaultName"));
 		DataGroup defaultName = defaultNames.iterator().next();
 		return defaultName.getFirstAtomicValueWithNameInData("value");
+	}
+
+	public HttpHandlerFactory getHttpHandlerFactory() {
+		// needed for tests
+		return httpHandlerFactory;
+	}
+
+	public String getFedorURL() {
+		// needed for tests
+		return fedoraURL;
 	}
 
 }

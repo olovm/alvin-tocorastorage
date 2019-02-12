@@ -19,8 +19,19 @@
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 
-public class AlvinFedoraToCoraConverterFactoryImp implements AlvinConverterFactory {
+public class AlvinFedoraToCoraConverterFactoryImp implements AlvinFedoraConverterFactory {
+
+	private String fedoraURL;
+
+	public static AlvinFedoraToCoraConverterFactoryImp usingFedoraURL(String fedoraURL) {
+		return new AlvinFedoraToCoraConverterFactoryImp(fedoraURL);
+	}
+
+	private AlvinFedoraToCoraConverterFactoryImp(String fedoraURL) {
+		this.fedoraURL = fedoraURL;
+	}
 
 	@Override
 	public AlvinFedoraToCoraConverter factorToCoraConverter(String type) {
@@ -32,8 +43,21 @@ public class AlvinFedoraToCoraConverterFactoryImp implements AlvinConverterFacto
 
 	@Override
 	public AlvinCoraToFedoraConverter factorToFedoraConverter(String type) {
-		// TODO Auto-generated method stub
-		return null;
+		if ("place".equals(type)) {
+			return createCoraToFedoraConverter();
+		}
+		throw NotImplementedException
+				.withMessage("No to Fedora converter implemented for: " + type);
 	}
 
+	private AlvinCoraToFedoraConverter createCoraToFedoraConverter() {
+		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
+		return AlvinCoraToFedoraPlaceConverter
+				.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
+	}
+
+	public String getFedoraURL() {
+		// needed for tests
+		return fedoraURL;
+	}
 }
