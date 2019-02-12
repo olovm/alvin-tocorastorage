@@ -55,7 +55,6 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		this.fedoraPassword = fedoraPassword;
 	}
 
-	// usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURLAndFedoraUsernameAndFedoraPassword
 	public static AlvinFedoraToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURLAndFedoraUsernameAndFedoraPassword(
 			HttpHandlerFactory httpHandlerFactory, AlvinConverterFactory converterFactory,
 			String baseURL, String fedoraUsername, String fedoraPassword) {

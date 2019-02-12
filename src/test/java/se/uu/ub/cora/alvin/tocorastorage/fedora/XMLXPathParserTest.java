@@ -46,4 +46,18 @@ public class XMLXPathParserTest {
 		parser.getStringFromNodeUsingXPath(null, "/broken/xpath/string not");
 	}
 
+	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ""
+			+ "Error setting string value on node")
+	public void testErrorWhenSettingString() throws Exception {
+		XMLXPathParser parser = XMLXPathParser.forXML("<pid></pid>");
+		parser.setStringInDocumentUsingXPath("/broken/xpath/string not", "dummy");
+	}
+
+	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ""
+			+ "Error converting node to String")
+	public void testBrokenGetDocumentAsString() throws Exception {
+		XMLXPathParser parser = XMLXPathParser.forXML("<pid></pid>");
+		parser.getDocumentAsString("/broken/xpath/string not");
+	}
+
 }
