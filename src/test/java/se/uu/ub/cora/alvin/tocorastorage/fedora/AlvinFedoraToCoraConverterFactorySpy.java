@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,19 +21,26 @@ package se.uu.ub.cora.alvin.tocorastorage.fedora;
 import java.util.ArrayList;
 import java.util.List;
 
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverter;
-import se.uu.ub.cora.alvin.tocorastorage.fedora.AlvinFedoraToCoraConverterFactory;
+public class AlvinFedoraToCoraConverterFactorySpy implements AlvinFedoraConverterFactory {
 
-public class AlvinFedoraToCoraConverterFactorySpy implements AlvinFedoraToCoraConverterFactory {
-
-	List<AlvinFedoraToCoraConverter> factoredConverters = new ArrayList<>();
-	List<String> factoredTypes = new ArrayList<>();
+	List<AlvinFedoraToCoraConverter> factoredToCoraConverters = new ArrayList<>();
+	List<String> factoredToCoraTypes = new ArrayList<>();
+	List<AlvinCoraToFedoraConverter> factoredToFedoraConverters = new ArrayList<>();
+	List<String> factoredToFedoraTypes = new ArrayList<>();
 
 	@Override
-	public AlvinFedoraToCoraConverter factor(String type) {
-		factoredTypes.add(type);
+	public AlvinFedoraToCoraConverter factorToCoraConverter(String type) {
+		factoredToCoraTypes.add(type);
 		AlvinFedoraToCoraConverter converter = new AlvinFedoraToCoraConverterSpy();
-		factoredConverters.add(converter);
+		factoredToCoraConverters.add(converter);
+		return converter;
+	}
+
+	@Override
+	public AlvinCoraToFedoraConverter factorToFedoraConverter(String type) {
+		factoredToFedoraTypes.add(type);
+		AlvinCoraToFedoraConverter converter = new AlvinCoraToFedoraConverterSpy();
+		factoredToFedoraConverters.add(converter);
 		return converter;
 	}
 

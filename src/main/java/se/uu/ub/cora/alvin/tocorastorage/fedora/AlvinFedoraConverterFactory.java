@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,24 +18,9 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-public final class ReadFedoraException extends RuntimeException {
+public interface AlvinFedoraConverterFactory {
 
-	private static final long serialVersionUID = 1L;
+	AlvinFedoraToCoraConverter factorToCoraConverter(String type);
 
-	public static ReadFedoraException withMessage(String message) {
-		return new ReadFedoraException(message);
-	}
-
-	public static ReadFedoraException withMessageAndException(String message, Exception e) {
-		return new ReadFedoraException(message, e);
-	}
-
-	private ReadFedoraException(String message) {
-		super(message);
-	}
-
-	private ReadFedoraException(String message, Exception e) {
-		super(message, e);
-	}
-
+	AlvinCoraToFedoraConverter factorToFedoraConverter(String type);
 }

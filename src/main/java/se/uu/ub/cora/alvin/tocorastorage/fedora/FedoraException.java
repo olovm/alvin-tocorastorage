@@ -16,29 +16,26 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.alvin.tocorastorage.db;
+package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-import static org.testng.Assert.assertEquals;
+public final class FedoraException extends RuntimeException {
 
-import org.testng.annotations.Test;
+	private static final long serialVersionUID = 1L;
 
-import se.uu.ub.cora.alvin.tocorastorage.fedora.FedoraException;
-
-public class ReadFedoraExceptionTest {
-	@Test
-	public void testInit() {
-		String message = "message";
-		FedoraException exception = FedoraException.withMessage(message);
-		assertEquals(exception.getMessage(), "message");
+	public static FedoraException withMessage(String message) {
+		return new FedoraException(message);
 	}
 
-	@Test
-	public void testWithMessageAndException() throws Exception {
-		Exception e = new Exception("some message");
-		FedoraException exception = FedoraException
-				.withMessageAndException("second message", e);
-		assertEquals(exception.getMessage(), "second message");
-		assertEquals(exception.getCause().getMessage(), "some message");
-
+	public static FedoraException withMessageAndException(String message, Exception e) {
+		return new FedoraException(message, e);
 	}
+
+	private FedoraException(String message) {
+		super(message);
+	}
+
+	private FedoraException(String message, Exception e) {
+		super(message, e);
+	}
+
 }

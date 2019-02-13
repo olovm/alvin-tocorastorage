@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,15 +19,45 @@
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
 import se.uu.ub.cora.alvin.tocorastorage.NotImplementedException;
+import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 
-public class AlvinFedoraToCoraConverterFactoryImp implements AlvinFedoraToCoraConverterFactory {
+public class AlvinFedoraToCoraConverterFactoryImp implements AlvinFedoraConverterFactory {
+
+	private String fedoraURL;
+
+	public static AlvinFedoraToCoraConverterFactoryImp usingFedoraURL(String fedoraURL) {
+		return new AlvinFedoraToCoraConverterFactoryImp(fedoraURL);
+	}
+
+	private AlvinFedoraToCoraConverterFactoryImp(String fedoraURL) {
+		this.fedoraURL = fedoraURL;
+	}
 
 	@Override
-	public AlvinFedoraToCoraConverter factor(String type) {
+	public AlvinFedoraToCoraConverter factorToCoraConverter(String type) {
 		if ("place".equals(type)) {
 			return new AlvinFedoraToCoraPlaceConverter();
 		}
 		throw NotImplementedException.withMessage("No converter implemented for: " + type);
 	}
 
+	@Override
+	public AlvinCoraToFedoraConverter factorToFedoraConverter(String type) {
+		if ("place".equals(type)) {
+			return createCoraToFedoraConverter();
+		}
+		throw NotImplementedException
+				.withMessage("No to Fedora converter implemented for: " + type);
+	}
+
+	private AlvinCoraToFedoraConverter createCoraToFedoraConverter() {
+		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
+		return AlvinCoraToFedoraPlaceConverter
+				.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
+	}
+
+	public String getFedoraURL() {
+		// needed for tests
+		return fedoraURL;
+	}
 }

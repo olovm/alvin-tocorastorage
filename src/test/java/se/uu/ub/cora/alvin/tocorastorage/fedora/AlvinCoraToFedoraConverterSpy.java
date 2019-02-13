@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,8 +18,17 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-public interface AlvinFedoraToCoraConverterFactory {
+import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
-	AlvinFedoraToCoraConverter factor(String type);
+public class AlvinCoraToFedoraConverterSpy implements AlvinCoraToFedoraConverter {
+
+	public DataGroup record;
+	public String returnedXML = "<dummy>Dummy xml from AlvinCoraToFedoraConverterSpy</dummy>";
+
+	@Override
+	public String toXML(DataGroup record) {
+		this.record = record;
+		return returnedXML;
+	}
 
 }

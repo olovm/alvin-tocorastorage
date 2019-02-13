@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -18,9 +18,15 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -37,19 +43,25 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private static final String PLACE = "place";
 	private HttpHandlerFactory httpHandlerFactory;
 	private String baseURL;
-	private AlvinFedoraToCoraConverterFactory converterFactory;
+	private AlvinFedoraConverterFactory converterFactory;
+	private String fedoraUsername;
+	private String fedoraPassword;
 
 	private AlvinFedoraToCoraRecordStorage(HttpHandlerFactory httpHandlerFactory,
-			AlvinFedoraToCoraConverterFactory converterFactory, String baseURL) {
+			AlvinFedoraConverterFactory converterFactory, String baseURL, String fedoraUsername,
+			String fedoraPassword) {
 		this.httpHandlerFactory = httpHandlerFactory;
 		this.converterFactory = converterFactory;
 		this.baseURL = baseURL;
+		this.fedoraUsername = fedoraUsername;
+		this.fedoraPassword = fedoraPassword;
 	}
 
-	public static AlvinFedoraToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURL(
-			HttpHandlerFactory httpHandlerFactory,
-			AlvinFedoraToCoraConverterFactory converterFactory, String baseURL) {
-		return new AlvinFedoraToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL);
+	public static AlvinFedoraToCoraRecordStorage usingHttpHandlerFactoryAndConverterFactoryAndFedoraBaseURLAndFedoraUsernameAndFedoraPassword(
+			HttpHandlerFactory httpHandlerFactory, AlvinFedoraConverterFactory converterFactory,
+			String baseURL, String fedoraUsername, String fedoraPassword) {
+		return new AlvinFedoraToCoraRecordStorage(httpHandlerFactory, converterFactory, baseURL,
+				fedoraUsername, fedoraPassword);
 	}
 
 	@Override
@@ -61,12 +73,12 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	}
 
 	private DataGroup readAndConvertPlaceFromFedora(String id) {
-		HttpHandler httpHandler = createHttpHandlerForPlace(id);
-		AlvinFedoraToCoraConverter toCoraConverter = converterFactory.factor(PLACE);
+		HttpHandler httpHandler = createHttpHandlerForReadingPlace(id);
+		AlvinFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PLACE);
 		return toCoraConverter.fromXML(httpHandler.getResponseText());
 	}
 
-	private HttpHandler createHttpHandlerForPlace(String id) {
+	private HttpHandler createHttpHandlerForReadingPlace(String id) {
 		String url = baseURL + "objects/" + id + "/datastreams/METADATA/content";
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);
 		httpHandler.setRequestMethod("GET");
@@ -92,7 +104,97 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	@Override
 	public void update(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		throw NotImplementedException.withMessage("update is not implemented");
+		if (PLACE.equals(type)) {
+			convertAndWritePlaceToFedora(type, id, record, collectedTerms);
+		} else {
+			throw NotImplementedException
+					.withMessage("update is not implemented for type: " + type);
+		}
+	}
+
+	private void convertAndWritePlaceToFedora(String type, String id, DataGroup record,
+			DataGroup collectedTerms) {
+		try {
+			tryToConvertAndWritePlaceToFedora(type, id, record, collectedTerms);
+		} catch (Exception e) {
+			throw FedoraException
+					.withMessageAndException("update to fedora failed for record: " + id, e);
+		}
+	}
+
+	private void tryToConvertAndWritePlaceToFedora(String type, String id, DataGroup record,
+			DataGroup collectedTerms) throws UnsupportedEncodingException {
+		String url = createUrlForWritingMetadataStreamToFedora(id, collectedTerms);
+		HttpHandler httpHandler = createHttpHandlerForUpdatingDatastreamUsingURL(url);
+		String fedoraXML = convertRecordToFedoraXML(type, record);
+		httpHandler.setOutput(fedoraXML);
+		int responseCode = httpHandler.getResponseCode();
+		throwErrorIfNotOkFromFedora(id, responseCode);
+	}
+
+	private void throwErrorIfNotOkFromFedora(String id, int responseCode) {
+		if (200 != responseCode) {
+			throw FedoraException.withMessage("update to fedora failed for record: " + id
+					+ ", with response code: " + responseCode);
+		}
+	}
+
+	private HttpHandler createHttpHandlerForUpdatingDatastreamUsingURL(String url) {
+		HttpHandler httpHandler = httpHandlerFactory.factor(url);
+		setRequestMethodForUpdatingDatastreamInFedora(httpHandler);
+		setAutorizationInHttpHandler(httpHandler);
+		return httpHandler;
+	}
+
+	private String createUrlForWritingMetadataStreamToFedora(String id, DataGroup collectedTerms)
+			throws UnsupportedEncodingException {
+		String datastreamLabel = getRecordLabelValueFromStorageTerms(collectedTerms);
+		String encodedDatastreamLabel = "";
+		encodedDatastreamLabel = URLEncoder.encode(datastreamLabel, "UTF-8");
+		return baseURL + "objects/" + id + "/datastreams/METADATA?format=?xml&controlGroup=M"
+				+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=" + encodedDatastreamLabel;
+	}
+
+	private void setRequestMethodForUpdatingDatastreamInFedora(HttpHandler httpHandler) {
+		httpHandler.setRequestMethod("PUT");
+	}
+
+	private void setAutorizationInHttpHandler(HttpHandler httpHandler) {
+		String encoded = Base64.getEncoder().encodeToString(
+				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
+		httpHandler.setRequestProperty("Authorization", "Basic " + encoded);
+	}
+
+	private String getRecordLabelValueFromStorageTerms(DataGroup collectedTerms) {
+		DataGroup storageGroup = collectedTerms.getFirstGroupWithNameInData("storage");
+		List<DataGroup> collectedDataTerms = storageGroup
+				.getAllGroupsWithNameInData("collectedDataTerm");
+		Optional<DataGroup> firstGroupWithRecordLabelStorageTerm = collectedDataTerms.stream()
+				.filter(filterByCollectTermId()).findFirst();
+		return getRecordLabelFromCollectedTermsOrDefaultLabel(firstGroupWithRecordLabelStorageTerm);
+	}
+
+	private String getRecordLabelFromCollectedTermsOrDefaultLabel(
+			Optional<DataGroup> firstGroupWithRecordLabelStorageTerm) {
+		if (firstGroupWithRecordLabelStorageTerm.isPresent()) {
+			return firstGroupWithRecordLabelStorageTerm.get()
+					.getFirstAtomicValueWithNameInData("collectTermValue");
+		}
+		return "LabelNotPresentInStorageTerms";
+	}
+
+	private Predicate<DataGroup> filterByCollectTermId() {
+		return this::collectedDataTermIsRecordLabel;
+	}
+
+	private boolean collectedDataTermIsRecordLabel(DataGroup collectedDataTerm) {
+		String collectTermId = collectedDataTerm.getFirstAtomicValueWithNameInData("collectTermId");
+		return collectTermId.equals("recordLabelStorageTerm");
+	}
+
+	private String convertRecordToFedoraXML(String type, DataGroup record) {
+		AlvinCoraToFedoraConverter converter = converterFactory.factorToFedoraConverter(type);
+		return converter.toXML(record);
 	}
 
 	@Override
@@ -107,7 +209,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		try {
 			return tryCreateSpiderReadResultFromReadingAndConvertingPlaceListInFedora();
 		} catch (Exception e) {
-			throw ReadFedoraException
+			throw FedoraException
 					.withMessageAndException("Unable to read list of places: " + e.getMessage(), e);
 		}
 	}
