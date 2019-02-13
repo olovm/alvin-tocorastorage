@@ -12,6 +12,7 @@ public class HttpHandlerSpy implements HttpHandler {
 
 	public String requestMetod;
 	public String responseText;
+	public int responseCode;
 	public Map<String, String> requestProperties = new HashMap<String, String>();
 	public List<String> outputStrings = new ArrayList<String>();
 
@@ -27,8 +28,7 @@ public class HttpHandlerSpy implements HttpHandler {
 
 	@Override
 	public int getResponseCode() {
-		// TODO Auto-generated method stub
-		return 0;
+		return responseCode;
 	}
 
 	@Override

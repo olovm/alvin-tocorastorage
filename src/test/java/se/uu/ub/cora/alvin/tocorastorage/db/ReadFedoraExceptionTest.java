@@ -22,20 +22,20 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.alvin.tocorastorage.fedora.ReadFedoraException;
+import se.uu.ub.cora.alvin.tocorastorage.fedora.FedoraException;
 
 public class ReadFedoraExceptionTest {
 	@Test
 	public void testInit() {
 		String message = "message";
-		ReadFedoraException exception = ReadFedoraException.withMessage(message);
+		FedoraException exception = FedoraException.withMessage(message);
 		assertEquals(exception.getMessage(), "message");
 	}
 
 	@Test
 	public void testWithMessageAndException() throws Exception {
 		Exception e = new Exception("some message");
-		ReadFedoraException exception = ReadFedoraException
+		FedoraException exception = FedoraException
 				.withMessageAndException("second message", e);
 		assertEquals(exception.getMessage(), "second message");
 		assertEquals(exception.getCause().getMessage(), "some message");

@@ -18,6 +18,8 @@
  */
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -112,10 +114,29 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 
 	private void convertAndWritePlaceToFedora(String type, String id, DataGroup record,
 			DataGroup collectedTerms) {
+		try {
+			tryToConvertAndWritePlaceToFedora(type, id, record, collectedTerms);
+		} catch (Exception e) {
+			throw FedoraException
+					.withMessageAndException("update to fedora failed for record: " + id, e);
+		}
+	}
+
+	private void tryToConvertAndWritePlaceToFedora(String type, String id, DataGroup record,
+			DataGroup collectedTerms) throws UnsupportedEncodingException {
 		String url = createUrlForWritingMetadataStreamToFedora(id, collectedTerms);
 		HttpHandler httpHandler = createHttpHandlerForUpdatingDatastreamUsingURL(url);
 		String fedoraXML = convertRecordToFedoraXML(type, record);
 		httpHandler.setOutput(fedoraXML);
+		int responseCode = httpHandler.getResponseCode();
+		throwErrorIfNotOkFromFedora(id, responseCode);
+	}
+
+	private void throwErrorIfNotOkFromFedora(String id, int responseCode) {
+		if (200 != responseCode) {
+			throw FedoraException.withMessage("update to fedora failed for record: " + id
+					+ ", with response code: " + responseCode);
+		}
 	}
 
 	private HttpHandler createHttpHandlerForUpdatingDatastreamUsingURL(String url) {
@@ -125,10 +146,13 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		return httpHandler;
 	}
 
-	private String createUrlForWritingMetadataStreamToFedora(String id, DataGroup collectedTerms) {
+	private String createUrlForWritingMetadataStreamToFedora(String id, DataGroup collectedTerms)
+			throws UnsupportedEncodingException {
 		String datastreamLabel = getRecordLabelValueFromStorageTerms(collectedTerms);
+		String encodedDatastreamLabel = "";
+		encodedDatastreamLabel = URLEncoder.encode(datastreamLabel, "UTF-8");
 		return baseURL + "objects/" + id + "/datastreams/METADATA?format=?xml&controlGroup=M"
-				+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=" + datastreamLabel;
+				+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=" + encodedDatastreamLabel;
 	}
 
 	private void setRequestMethodForUpdatingDatastreamInFedora(HttpHandler httpHandler) {
@@ -185,7 +209,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		try {
 			return tryCreateSpiderReadResultFromReadingAndConvertingPlaceListInFedora();
 		} catch (Exception e) {
-			throw ReadFedoraException
+			throw FedoraException
 					.withMessageAndException("Unable to read list of places: " + e.getMessage(), e);
 		}
 	}
