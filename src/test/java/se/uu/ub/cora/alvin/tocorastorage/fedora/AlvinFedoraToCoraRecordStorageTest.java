@@ -23,6 +23,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -73,7 +74,8 @@ public class AlvinFedoraToCoraRecordStorageTest {
 
 	@Test
 	public void readPlaceCallsFedoraAndReturnsConvertedResult() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseTexts.add("Dummy response text");
 		DataGroup readPlace = alvinToCoraRecordStorage.read("place", "alvin-place:22");
 		assertEquals(httpHandlerFactory.urls.get(0),
 				baseURL + "objects/alvin-place:22/datastreams/METADATA/content");
@@ -85,7 +87,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(converterFactory.factoredToCoraTypes.get(0), "place");
 		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredToCoraConverters
 				.get(0);
-		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
+		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseTexts.get(0));
 		assertEquals(readPlace, alvinToCoraConverter.convertedDataGroup);
 	}
 
@@ -103,7 +105,11 @@ public class AlvinFedoraToCoraRecordStorageTest {
 
 	@Test
 	public void createPlaceCreatesRecordInStorages() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseTexts.add(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><pidList  xmlns=\"http://www.fedora.info/definitions/1/0/management/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/getNextPIDInfo.xsd\"><pid>next-pid:444</pid></pidList>");
+		httpHandlerFactory.responseTexts.add("Dummy response text");
+		httpHandlerFactory.responseTexts.add("Dummy response text");
 		DataGroup record = DataGroup.withNameInData("authority");
 
 		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
@@ -114,27 +120,71 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		alvinToCoraRecordStorage.create("place", "alvin-place:22", record, collectedTerms, linkList,
 				dataDivider);
 
-		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
-		String encodedLabel = URLEncoder.encode("Place created from cora", "UTF-8");
-		assertEquals(httpHandlerFactory.urls.get(0), baseURL + "objects/new?namespace=alvin-place"
-				+ "&logMessage=coraWritten&label=" + encodedLabel);
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 3);
 
-		HttpHandlerSpy httpHandlerForObject = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandlerForObject.requestMethod, "POST");
-		String encoded = Base64.getEncoder().encodeToString(
-				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
-		assertEquals(httpHandlerForObject.requestProperties.get("Authorization"),
-				"Basic " + encoded);
-		// assertTrue(httpHandlerForObject.responseCodeWasRequested);
+		assertCorrectHttpHandlerForNextPid();
+
+		assertCorrectHttpHandlerForCreatingObject();
 
 		assertEquals(converterFactory.factoredToFedoraConverters.size(), 1);
 		assertEquals(converterFactory.factoredToFedoraTypes.get(0), "place");
 		AlvinCoraToFedoraConverterSpy converter = (AlvinCoraToFedoraConverterSpy) converterFactory.factoredToFedoraConverters
 				.get(0);
 		assertEquals(converter.record, record);
-		assertEquals(converter.returnedNewXML, httpHandlerForObject.outputStrings.get(0));
 
-		HttpHandlerSpy httpHandlerForDatastream = httpHandlerFactory.factoredHttpHandlers.get(1);
+		assertCorrectHttpHandlerForCreatingDatastream(converter);
+
+		// HttpHandlerSpy httpHandlerForDatastream =
+		// httpHandlerFactory.factoredHttpHandlers.get(2);
+		// assertEquals(httpHandlerForDatastream.requestMethod, "POST");
+
+		// assertEquals(converter.returnedNewXML,
+		// httpHandlerForObject.outputStrings.get(0));
+
+		// HttpHandlerSpy httpHandlerForDatastream =
+		// httpHandlerFactory.factoredHttpHandlers.get(1);
+	}
+
+	private void assertCorrectHttpHandlerForNextPid() {
+		HttpHandlerSpy httpHandlerForPid = httpHandlerFactory.factoredHttpHandlers.get(1);
+		assertEquals(httpHandlerForPid.requestMethod, "POST");
+		assertEquals(httpHandlerFactory.urls.get(0),
+				baseURL + "objects/nextPID?namespace=alvin-place" + "&format=xml");
+
+	}
+
+	private void assertCorrectHttpHandlerForCreatingObject() throws UnsupportedEncodingException {
+		HttpHandlerSpy httpHandlerForObject = httpHandlerFactory.factoredHttpHandlers.get(1);
+		assertEquals(httpHandlerForObject.requestMethod, "POST");
+		String encoded = Base64.getEncoder().encodeToString(
+				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
+		assertEquals(httpHandlerForObject.requestProperties.get("Authorization"),
+				"Basic " + encoded);
+
+		String encodedLabel = URLEncoder.encode("Place created from cora", "UTF-8");
+		assertEquals(httpHandlerFactory.urls.get(1),
+				baseURL + "objects/next-pid:444?namespace=alvin-place"
+						+ "&logMessage=coraWritten&label=" + encodedLabel);
+		assertTrue(httpHandlerForObject.responseCodeWasRequested);
+	}
+
+	private void assertCorrectHttpHandlerForCreatingDatastream(
+			AlvinCoraToFedoraConverterSpy converterSpy) throws UnsupportedEncodingException {
+		HttpHandlerSpy httpHandlerForDatastream = httpHandlerFactory.factoredHttpHandlers.get(2);
+		assertEquals(httpHandlerForDatastream.requestMethod, "POST");
+		String encoded = Base64.getEncoder().encodeToString(
+				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
+
+		assertEquals(httpHandlerForDatastream.requestProperties.get("Authorization"),
+				"Basic " + encoded);
+
+		String encodedLabel = URLEncoder.encode("Datastream created from cora", "UTF-8");
+		assertEquals(httpHandlerFactory.urls.get(2),
+				baseURL + "objects/next-pid:444/datastreams/METADATA?controlGroup=M"
+						+ "&logMessage=coraWritten&dsLabel=" + encodedLabel
+						+ "&checksumType=SHA-512");
+		assertEquals(converterSpy.returnedNewXML, httpHandlerForDatastream.outputStrings.get(0));
+		assertTrue(httpHandlerForDatastream.responseCodeWasRequested);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -157,7 +207,8 @@ public class AlvinFedoraToCoraRecordStorageTest {
 
 	@Test
 	public void updateUpdatesRecordInStoragesName() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseTexts.add("Dummy response text");
 		DataGroup record = DataGroup.withNameInData("authority");
 
 		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
@@ -169,6 +220,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				dataDivider);
 
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
+
 		String encodedLabel = URLEncoder.encode("Some Place Collected Name åäö", "UTF-8");
 		assertEquals(httpHandlerFactory.urls.get(0),
 				baseURL + "objects/alvin-place:22/datastreams/METADATA?format=?xml&controlGroup=M"
@@ -208,7 +260,8 @@ public class AlvinFedoraToCoraRecordStorageTest {
 
 	@Test
 	public void updateIsMissingRecordLabelInCollectedStorageTerms() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseTexts.add("Dummy response text");
 		DataGroup record = DataGroup.withNameInData("authority");
 
 		DataGroup collectedTerms = DataGroup.withNameInData("collectedData");
@@ -241,7 +294,8 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
 			+ "update to fedora failed for record: alvin-place:22")
 	public void updateIfNotOkFromFedoraThrowException() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseTexts.add("Dummy response text");
 		httpHandlerFactory.responseCode = 505;
 
 		DataGroup record = DataGroup.withNameInData("authority");
@@ -254,7 +308,8 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
 			+ "update to fedora failed for record: alvin-place:23")
 	public void updateIfNotOkFromFedoraThrowExceptionOtherRecord() throws Exception {
-		httpHandlerFactory.responseText = "Dummy response text";
+		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseTexts.add("Dummy response text");
 		httpHandlerFactory.responseCode = 500;
 
 		DataGroup record = DataGroup.withNameInData("authority");
@@ -274,13 +329,16 @@ public class AlvinFedoraToCoraRecordStorageTest {
 			+ "Unable to read list of places: Can not read xml: "
 			+ "The element type \"someTag\" must be terminated by the matching end-tag \"</someTag>\".")
 	public void readListThrowsParseExceptionOnBrokenXML() throws Exception {
-		httpHandlerFactory.responseText = "<someTag></notSameTag>";
+		// httpHandlerFactory.responseText = "<someTag></notSameTag>";
+		httpHandlerFactory.responseTexts.add("<someTag></notSameTag>");
 		alvinToCoraRecordStorage.readList("place", DataGroup.withNameInData("filter"));
 	}
 
 	@Test
 	public void readPlaceListCallsFedoraAndReturnsConvertedResult() throws Exception {
-		httpHandlerFactory.responseText = createXMLForPlaceList();
+		// httpHandlerFactory.responseText = createXMLForPlaceList();
+		httpHandlerFactory.responseTexts.add(createXMLForPlaceList());
+		addDummyResponsesForAllObjectsInList();
 		Collection<DataGroup> readPlaceList = alvinToCoraRecordStorage.readList("place",
 				DataGroup.withNameInData("filter")).listOfDataGroups;
 		assertEquals(httpHandlerFactory.urls.get(0), baseURL
@@ -306,10 +364,16 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(converterFactory.factoredToCoraTypes.get(0), "place");
 		AlvinFedoraToCoraConverterSpy alvinToCoraConverter = (AlvinFedoraToCoraConverterSpy) converterFactory.factoredToCoraConverters
 				.get(0);
-		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseText);
+		assertEquals(alvinToCoraConverter.xml, httpHandlerFactory.responseTexts.get(1));
 		assertEquals(readPlaceList.size(), 6);
 		Iterator<DataGroup> readPlaceIterator = readPlaceList.iterator();
 		assertEquals(readPlaceIterator.next(), alvinToCoraConverter.convertedDataGroup);
+	}
+
+	private void addDummyResponsesForAllObjectsInList() {
+		for (int i = 0; i < 6; i++) {
+			httpHandlerFactory.responseTexts.add("Dummy response text");
+		}
 	}
 
 	private String createXMLForPlaceList() {

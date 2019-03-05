@@ -12,13 +12,18 @@ public class HttpHandlerFactorySpy implements HttpHandlerFactory {
 	public List<HttpHandlerSpy> factoredHttpHandlers = new ArrayList<>();
 	public String responseText = "";
 	public int responseCode = 200;
+	public List<String> responseTexts = new ArrayList<>();
 
 	@Override
 	public HttpHandler factor(String url) {
 		urls.add(url);
 		HttpHandlerSpy httpHandlerSpy = new HttpHandlerSpy();
 		factoredHttpHandlers.add(httpHandlerSpy);
-		httpHandlerSpy.responseText = responseText;
+
+		int numOfHandlersFactored = factoredHttpHandlers.size();
+
+		// httpHandlerSpy.responseText = responseText;
+		httpHandlerSpy.responseText = responseTexts.get(numOfHandlersFactored - 1);
 		httpHandlerSpy.responseCode = responseCode;
 		return httpHandlerSpy;
 	}

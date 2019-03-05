@@ -42,6 +42,7 @@ public class HttpHandlerSpy implements HttpHandler {
 
 	@Override
 	public String getResponseText() {
+
 		return responseText;
 	}
 
