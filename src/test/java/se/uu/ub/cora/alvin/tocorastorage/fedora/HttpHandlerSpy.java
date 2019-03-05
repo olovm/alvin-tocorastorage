@@ -33,6 +33,7 @@ public class HttpHandlerSpy implements HttpHandler {
 	public int responseCode;
 	public Map<String, String> requestProperties = new HashMap<String, String>();
 	public List<String> outputStrings = new ArrayList<String>();
+	public boolean responseCodeWasRequested = false;
 
 	@Override
 	public void setRequestMethod(String requestMetod) {
@@ -46,6 +47,7 @@ public class HttpHandlerSpy implements HttpHandler {
 
 	@Override
 	public int getResponseCode() {
+		responseCodeWasRequested = true;
 		return responseCode;
 	}
 

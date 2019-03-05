@@ -23,4 +23,7 @@ import se.uu.ub.cora.bookkeeper.data.DataGroup;
 
 public interface AlvinCoraToFedoraConverter {
 	public String toXML(DataGroup record);
+
+	public String toNewXML(DataGroup record);
+
 }

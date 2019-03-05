@@ -93,4 +93,9 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 		return fedoraURL;
 	}
 
+	@Override
+	public String toNewXML(DataGroup record) {
+		return "<place id=\"1\">\n" + "	<pid>alvin-place:680</pid>\n" + "</place>";
+	}
+
 }

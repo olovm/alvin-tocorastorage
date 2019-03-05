@@ -24,11 +24,18 @@ public class AlvinCoraToFedoraConverterSpy implements AlvinCoraToFedoraConverter
 
 	public DataGroup record;
 	public String returnedXML = "<dummy>Dummy xml from AlvinCoraToFedoraConverterSpy</dummy>";
+	public String returnedNewXML = "<dummy>Dummy new xml from AlvinCoraToFedoraConverterSpy</dummy>";
 
 	@Override
 	public String toXML(DataGroup record) {
 		this.record = record;
 		return returnedXML;
+	}
+
+	@Override
+	public String toNewXML(DataGroup record) {
+		this.record = record;
+		return returnedNewXML;
 	}
 
 }

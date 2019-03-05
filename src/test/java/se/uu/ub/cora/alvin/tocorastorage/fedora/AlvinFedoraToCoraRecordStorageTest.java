@@ -95,10 +95,11 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		alvinToCoraRecordStorage.create(null, null, null, null, null, null);
 	}
 
-	// /objects/ [{pid}| new] ? [label] [format] [encoding] [namespace] [ownerId]
-	// [logMessage] [ignoreMime] [state]
-	//
-	// POST: /objects/new?namespace=demo
+	// create object:
+	// http://localhost:8089/fedora/objects/new?namespace=alvin-place&logMessage=coraWritten&label=Place'
+
+	// create datastream
+	// http://localhost:8089/fedora/objects/alvin-place:1685/datastreams/METADATA?&logMessage=coraWritten&dsLabel=Place&checksumType=SHA-512&controlGroup=M
 
 	@Test
 	public void createPlaceCreatesRecordInStorages() throws Exception {
@@ -114,11 +115,26 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				dataDivider);
 
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
-		HttpHandlerSpy httpHandlerSpy = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandlerSpy.requestMethod, "POST");
 		String encodedLabel = URLEncoder.encode("Place created from cora", "UTF-8");
 		assertEquals(httpHandlerFactory.urls.get(0), baseURL + "objects/new?namespace=alvin-place"
 				+ "&logMessage=coraWritten&label=" + encodedLabel);
+
+		HttpHandlerSpy httpHandlerForObject = httpHandlerFactory.factoredHttpHandlers.get(0);
+		assertEquals(httpHandlerForObject.requestMethod, "POST");
+		String encoded = Base64.getEncoder().encodeToString(
+				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
+		assertEquals(httpHandlerForObject.requestProperties.get("Authorization"),
+				"Basic " + encoded);
+		// assertTrue(httpHandlerForObject.responseCodeWasRequested);
+
+		assertEquals(converterFactory.factoredToFedoraConverters.size(), 1);
+		assertEquals(converterFactory.factoredToFedoraTypes.get(0), "place");
+		AlvinCoraToFedoraConverterSpy converter = (AlvinCoraToFedoraConverterSpy) converterFactory.factoredToFedoraConverters
+				.get(0);
+		assertEquals(converter.record, record);
+		assertEquals(converter.returnedNewXML, httpHandlerForObject.outputStrings.get(0));
+
+		HttpHandlerSpy httpHandlerForDatastream = httpHandlerFactory.factoredHttpHandlers.get(1);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""

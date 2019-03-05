@@ -73,4 +73,19 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 		return record;
 	}
 
+	@Test
+	public void testConvertToNewFedoraXML() throws Exception {
+
+		HttpHandlerFactorySpy httpHandlerFactory = new HttpHandlerFactorySpy();
+
+		String fedoraURL = "someFedoraURL";
+		AlvinCoraToFedoraConverter converter = AlvinCoraToFedoraPlaceConverter
+				.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
+		DataGroup record = createPlace679DataGroup();
+
+		String xml = converter.toNewXML(record);
+		assertEquals(xml, ResourceReader.readResourceAsString("place/expectedCreated680.xml"));
+
+	}
+
 }
