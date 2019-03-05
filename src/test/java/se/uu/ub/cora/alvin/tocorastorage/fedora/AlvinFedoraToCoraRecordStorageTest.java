@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -79,7 +79,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				baseURL + "objects/alvin-place:22/datastreams/METADATA/content");
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
 		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "GET");
+		assertEquals(httpHandler.requestMethod, "GET");
 
 		assertEquals(converterFactory.factoredToCoraConverters.size(), 1);
 		assertEquals(converterFactory.factoredToCoraTypes.get(0), "place");
@@ -93,6 +93,32 @@ public class AlvinFedoraToCoraRecordStorageTest {
 			+ "create is not implemented")
 	public void createThrowsNotImplementedException() throws Exception {
 		alvinToCoraRecordStorage.create(null, null, null, null, null, null);
+	}
+
+	// /objects/ [{pid}| new] ? [label] [format] [encoding] [namespace] [ownerId]
+	// [logMessage] [ignoreMime] [state]
+	//
+	// POST: /objects/new?namespace=demo
+
+	@Test
+	public void createPlaceCreatesRecordInStorages() throws Exception {
+		httpHandlerFactory.responseText = "Dummy response text";
+		DataGroup record = DataGroup.withNameInData("authority");
+
+		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
+
+		DataGroup linkList = null;
+		String dataDivider = null;
+
+		alvinToCoraRecordStorage.create("place", "alvin-place:22", record, collectedTerms, linkList,
+				dataDivider);
+
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
+		HttpHandlerSpy httpHandlerSpy = httpHandlerFactory.factoredHttpHandlers.get(0);
+		assertEquals(httpHandlerSpy.requestMethod, "POST");
+		String encodedLabel = URLEncoder.encode("Place created from cora", "UTF-8");
+		assertEquals(httpHandlerFactory.urls.get(0), baseURL + "objects/new?namespace=alvin-place"
+				+ "&logMessage=coraWritten&label=" + encodedLabel);
 	}
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
@@ -133,7 +159,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 						+ "&logMessage=coraWritten&checksumType=SHA-512&dsLabel=" + encodedLabel);
 
 		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "PUT");
+		assertEquals(httpHandler.requestMethod, "PUT");
 		String encoded = Base64.getEncoder().encodeToString(
 				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
 		assertEquals(httpHandler.requestProperties.get("Authorization"), "Basic " + encoded);
@@ -245,7 +271,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				+ "objects?pid=true&maxResults=100&resultFormat=xml&query=pid%7Ealvin-place:*");
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 7);
 		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "GET");
+		assertEquals(httpHandler.requestMethod, "GET");
 
 		assertEquals(httpHandlerFactory.urls.get(1),
 				baseURL + "objects/alvin-place:22/datastreams/METADATA/content");

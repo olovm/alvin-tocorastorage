@@ -45,7 +45,7 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 				fedoraURL + "objects/alvin-place:679/datastreams/METADATA/content");
 
 		HttpHandlerSpy httpHandler = httpHandlerFactory.factoredHttpHandlers.get(0);
-		assertEquals(httpHandler.requestMetod, "GET");
+		assertEquals(httpHandler.requestMethod, "GET");
 
 		assertEquals(xml, ResourceReader.readResourceAsString("place/expectedUpdated679.xml"));
 

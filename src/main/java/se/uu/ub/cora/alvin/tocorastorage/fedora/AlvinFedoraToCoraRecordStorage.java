@@ -88,7 +88,32 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	@Override
 	public void create(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
-		throw NotImplementedException.withMessage("create is not implemented");
+		if (PLACE.equals(type)) {
+			createPlaceInFedora(id, collectedTerms);
+		} else {
+			throw NotImplementedException.withMessage("create is not implemented");
+		}
+	}
+
+	private void createPlaceInFedora(String id, DataGroup collectedTerms) {
+		try {
+			String url = createUrlForCreatingObjectInFedora(id, collectedTerms);
+			HttpHandler httpHandler = httpHandlerFactory.factor(url);
+			httpHandler.setRequestMethod("POST");
+		} catch (UnsupportedEncodingException e) {
+			// throw FedoraException
+			// .withMessageAndException("update to fedora failed for record: " + id, e);
+		}
+	}
+
+	private String createUrlForCreatingObjectInFedora(String id, DataGroup collectedTerms)
+			throws UnsupportedEncodingException {
+		String objectLabel = "Place created from cora";
+		String encodedDatastreamLabel = "";
+		encodedDatastreamLabel = URLEncoder.encode(objectLabel, "UTF-8");
+		// TODO: hur avgöra namespace?
+		return baseURL + "objects/new?namespace=alvin-place" + "&logMessage=coraWritten&label="
+				+ encodedDatastreamLabel;
 	}
 
 	@Override
