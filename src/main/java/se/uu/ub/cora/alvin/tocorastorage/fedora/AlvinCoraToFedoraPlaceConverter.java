@@ -19,7 +19,23 @@
 
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
+import java.io.StringWriter;
 import java.util.Collection;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import se.uu.ub.cora.bookkeeper.data.DataAttribute;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
@@ -31,15 +47,22 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 	private HttpHandlerFactory httpHandlerFactory;
 	private String fedoraURL;
 	private XMLXPathParser parser;
+	private DocumentBuilderFactory documentBuilderFactory;
+	private TransformerFactory transformerFactory;
 
-	public static AlvinCoraToFedoraPlaceConverter usingHttpHandlerFactoryAndFedoraUrl(
-			HttpHandlerFactory httpHandlerFactory, String fedoraURL) {
-		return new AlvinCoraToFedoraPlaceConverter(httpHandlerFactory, fedoraURL);
+	public static AlvinCoraToFedoraPlaceConverter usingHttpHandlerFactoryDocumentBuilderFactoryTransformerFactoryAndFedoraUrl(
+			HttpHandlerFactory httpHandlerFactory, DocumentBuilderFactory documentBuilderFactory,
+			TransformerFactory transformerFactory, String fedoraURL) {
+		return new AlvinCoraToFedoraPlaceConverter(httpHandlerFactory, documentBuilderFactory,
+				transformerFactory, fedoraURL);
 	}
 
 	private AlvinCoraToFedoraPlaceConverter(HttpHandlerFactory httpHandlerFactory,
+			DocumentBuilderFactory documentBuilderFactory, TransformerFactory transformerFactory,
 			String fedoraURL) {
 		this.httpHandlerFactory = httpHandlerFactory;
+		this.documentBuilderFactory = documentBuilderFactory;
+		this.transformerFactory = transformerFactory;
 		this.fedoraURL = fedoraURL;
 	}
 
@@ -95,7 +118,64 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 
 	@Override
 	public String toNewXML(DataGroup record) {
-		return "<place id=\"1\">\n" + "	<pid>alvin-place:680</pid>\n" + "</place>";
+		// DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		String xml = "";
+		try {
+			DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
+			// DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			Document document = docBuilder.newDocument();
+			Element rootElement = document.createElement("place");
+			document.appendChild(rootElement);
+			//
+			Element pid = createPidNodeUsingRecordAndDocument(record, document);
+			rootElement.appendChild(pid);
+			//
+			Transformer transformer = createTransformer();
+			StringWriter writer = new StringWriter();
+			addDocumentToWriterAndTransform(document, writer, transformer);
+			//
+			xml = writer.toString();
+			//
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		XMLXPathParser forXML = XMLXPathParser.forXML(xml);
+		return forXML.getDocumentAsString("/");
+		// return xml;
+		// return "";
+	}
+
+	private Element createPidNodeUsingRecordAndDocument(DataGroup record, Document document) {
+		String recordId = getIdFromRecord(record);
+		Element pid = document.createElement("pid");
+		pid.appendChild(document.createTextNode(recordId));
+		return pid;
+	}
+
+	private void addDocumentToWriterAndTransform(Document document, StringWriter writer,
+			Transformer transformer) throws TransformerException {
+		DOMSource source = new DOMSource(document);
+		StreamResult result = new StreamResult(writer);
+
+		transformer.transform(source, result);
+	}
+
+	private Transformer createTransformer()
+			throws TransformerFactoryConfigurationError, TransformerConfigurationException {
+		// TransformerFactory transformerFactory2 = TransformerFactory.newInstance();
+
+		Transformer transformer = transformerFactory.newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+		return transformer;
 	}
 
 }
