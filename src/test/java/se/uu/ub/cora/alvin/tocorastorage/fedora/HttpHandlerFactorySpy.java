@@ -12,6 +12,7 @@ public class HttpHandlerFactorySpy implements HttpHandlerFactory {
 	public List<HttpHandlerSpy> factoredHttpHandlers = new ArrayList<>();
 	public String responseText = "";
 	public int responseCode = 200;
+	public List<Integer> responseCodes = new ArrayList<>();
 	public List<String> responseTexts = new ArrayList<>();
 
 	@Override
@@ -24,7 +25,8 @@ public class HttpHandlerFactorySpy implements HttpHandlerFactory {
 
 		// httpHandlerSpy.responseText = responseText;
 		httpHandlerSpy.responseText = responseTexts.get(numOfHandlersFactored - 1);
-		httpHandlerSpy.responseCode = responseCode;
+		// httpHandlerSpy.responseCode = responseCode;
+		httpHandlerSpy.responseCode = responseCodes.get(numOfHandlersFactored - 1);
 		return httpHandlerSpy;
 	}
 

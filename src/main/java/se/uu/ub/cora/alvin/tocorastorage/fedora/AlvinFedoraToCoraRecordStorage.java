@@ -101,28 +101,36 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		try {
 			String nextPidFromFedora = getPid();
 
-			String url = createUrlForCreatingObjectInFedora(nextPidFromFedora);
-			HttpHandler httpHandler = httpHandlerFactory.factor(url);
-			httpHandler.setRequestMethod("POST");
-			setAutorizationInHttpHandler(httpHandler);
-			httpHandler.getResponseCode();
+			createObjectForPlace(nextPidFromFedora);
 
 			AlvinCoraToFedoraConverter converter = converterFactory.factorToFedoraConverter(type);
 			String newXML = converter.toNewXML(record);
 
-			String urlForDataStream = createUrlForCreatingDatastreamInFedora(nextPidFromFedora);
-			HttpHandler httpHandlerForDatastream = httpHandlerFactory.factor(urlForDataStream);
-			setAutorizationInHttpHandler(httpHandlerForDatastream);
-			httpHandlerForDatastream.setRequestMethod("POST");
-			httpHandlerForDatastream.setOutput(newXML);
-			httpHandlerForDatastream.getResponseCode();
-
-			// httpHandler.setOutput(newXML);
+			createDatastreamForPlace(nextPidFromFedora, newXML);
 
 		} catch (UnsupportedEncodingException e) {
 			// throw FedoraException
 			// .withMessageAndException("update to fedora failed for record: " + id, e);
 		}
+	}
+
+	private void createDatastreamForPlace(String nextPidFromFedora, String newXML)
+			throws UnsupportedEncodingException {
+		String urlForDataStream = createUrlForCreatingDatastreamInFedora(nextPidFromFedora);
+		HttpHandler httpHandlerForDatastream = httpHandlerFactory.factor(urlForDataStream);
+		setAutorizationInHttpHandler(httpHandlerForDatastream);
+		httpHandlerForDatastream.setRequestMethod("POST");
+		httpHandlerForDatastream.setOutput(newXML);
+		httpHandlerForDatastream.getResponseCode();
+	}
+
+	private void createObjectForPlace(String nextPidFromFedora)
+			throws UnsupportedEncodingException {
+		String url = createUrlForCreatingObjectInFedora(nextPidFromFedora);
+		HttpHandler httpHandler = httpHandlerFactory.factor(url);
+		httpHandler.setRequestMethod("POST");
+		setAutorizationInHttpHandler(httpHandler);
+		httpHandler.getResponseCode();
 	}
 
 	private String getPid() {
@@ -134,7 +142,15 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		String urlForNextPid = baseURL + "objects/nextPID?namespace=alvin-place&format=xml";
 		HttpHandler httpHandlerForPid = httpHandlerFactory.factor(urlForNextPid);
 		httpHandlerForPid.setRequestMethod("POST");
+		throwErrorIfPidCouldNotBeFetched(httpHandlerForPid);
 		return httpHandlerForPid.getResponseText();
+	}
+
+	private void throwErrorIfPidCouldNotBeFetched(HttpHandler httpHandlerForPid) {
+		if (httpHandlerForPid.getResponseCode() != 201) {
+			throw FedoraException.withMessage("getting nexxt pid from fedora failed "
+					+ ", with response code: " + httpHandlerForPid.getResponseCode());
+		}
 	}
 
 	private String parseXMLAndExtractPid(String nextPidXML) {

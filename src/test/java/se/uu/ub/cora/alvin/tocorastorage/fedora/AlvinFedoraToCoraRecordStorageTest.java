@@ -76,6 +76,8 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	public void readPlaceCallsFedoraAndReturnsConvertedResult() throws Exception {
 		// httpHandlerFactory.responseText = "Dummy response text";
 		httpHandlerFactory.responseTexts.add("Dummy response text");
+		httpHandlerFactory.responseCodes.add(200);
+
 		DataGroup readPlace = alvinToCoraRecordStorage.read("place", "alvin-place:22");
 		assertEquals(httpHandlerFactory.urls.get(0),
 				baseURL + "objects/alvin-place:22/datastreams/METADATA/content");
@@ -106,6 +108,9 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	@Test
 	public void createPlaceCreatesRecordInStorages() throws Exception {
 		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseCodes.add(201);
+		httpHandlerFactory.responseCodes.add(201);
+		httpHandlerFactory.responseCodes.add(201);
 		httpHandlerFactory.responseTexts.add(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><pidList  xmlns=\"http://www.fedora.info/definitions/1/0/management/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/getNextPIDInfo.xsd\"><pid>next-pid:444</pid></pidList>");
 		httpHandlerFactory.responseTexts.add("Dummy response text");
@@ -134,15 +139,6 @@ public class AlvinFedoraToCoraRecordStorageTest {
 
 		assertCorrectHttpHandlerForCreatingDatastream(converter);
 
-		// HttpHandlerSpy httpHandlerForDatastream =
-		// httpHandlerFactory.factoredHttpHandlers.get(2);
-		// assertEquals(httpHandlerForDatastream.requestMethod, "POST");
-
-		// assertEquals(converter.returnedNewXML,
-		// httpHandlerForObject.outputStrings.get(0));
-
-		// HttpHandlerSpy httpHandlerForDatastream =
-		// httpHandlerFactory.factoredHttpHandlers.get(1);
 	}
 
 	private void assertCorrectHttpHandlerForNextPid() {
@@ -187,6 +183,43 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertTrue(httpHandlerForDatastream.responseCodeWasRequested);
 	}
 
+	@Test
+	public void createPlaceErrorGettingPidDoNotCreateObjectOrDatastrem() throws Exception {
+		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseCodes.add(500);
+		httpHandlerFactory.responseTexts.add("Error from next pid");
+		// httpHandlerFactory.responseTexts.add("Dummy response text");
+		// httpHandlerFactory.responseTexts.add("Dummy response text");
+		DataGroup record = DataGroup.withNameInData("authority");
+
+		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
+
+		DataGroup linkList = null;
+		String dataDivider = null;
+		boolean exceptionWasCaught = false;
+		try {
+			alvinToCoraRecordStorage.create("place", "alvin-place:22", record, collectedTerms,
+					linkList, dataDivider);
+		} catch (FedoraException e) {
+			exceptionWasCaught = true;
+		}
+		assertTrue(exceptionWasCaught);
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
+		assertCorrectHttpHandlerForNextPid();
+
+		// assertCorrectHttpHandlerForCreatingObject();
+		//
+		// assertEquals(converterFactory.factoredToFedoraConverters.size(), 1);
+		// assertEquals(converterFactory.factoredToFedoraTypes.get(0), "place");
+		// AlvinCoraToFedoraConverterSpy converter = (AlvinCoraToFedoraConverterSpy)
+		// converterFactory.factoredToFedoraConverters
+		// .get(0);
+		// assertEquals(converter.record, record);
+		//
+		// assertCorrectHttpHandlerForCreatingDatastream(converter);
+
+	}
+
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "deleteByTypeAndId is not implemented")
 	public void deleteByTypeAndIdThrowsNotImplementedException() throws Exception {
@@ -208,6 +241,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	@Test
 	public void updateUpdatesRecordInStoragesName() throws Exception {
 		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseCodes.add(200);
 		httpHandlerFactory.responseTexts.add("Dummy response text");
 		DataGroup record = DataGroup.withNameInData("authority");
 
@@ -261,6 +295,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	@Test
 	public void updateIsMissingRecordLabelInCollectedStorageTerms() throws Exception {
 		// httpHandlerFactory.responseText = "Dummy response text";
+		httpHandlerFactory.responseCodes.add(200);
 		httpHandlerFactory.responseTexts.add("Dummy response text");
 		DataGroup record = DataGroup.withNameInData("authority");
 
@@ -296,7 +331,8 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	public void updateIfNotOkFromFedoraThrowException() throws Exception {
 		// httpHandlerFactory.responseText = "Dummy response text";
 		httpHandlerFactory.responseTexts.add("Dummy response text");
-		httpHandlerFactory.responseCode = 505;
+		// httpHandlerFactory.responseCode = 505;
+		httpHandlerFactory.responseCodes.add(500);
 
 		DataGroup record = DataGroup.withNameInData("authority");
 		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
@@ -310,7 +346,8 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	public void updateIfNotOkFromFedoraThrowExceptionOtherRecord() throws Exception {
 		// httpHandlerFactory.responseText = "Dummy response text";
 		httpHandlerFactory.responseTexts.add("Dummy response text");
-		httpHandlerFactory.responseCode = 500;
+		// httpHandlerFactory.responseCode = 500;
+		httpHandlerFactory.responseCodes.add(505);
 
 		DataGroup record = DataGroup.withNameInData("authority");
 		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
@@ -331,14 +368,17 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	public void readListThrowsParseExceptionOnBrokenXML() throws Exception {
 		// httpHandlerFactory.responseText = "<someTag></notSameTag>";
 		httpHandlerFactory.responseTexts.add("<someTag></notSameTag>");
+		httpHandlerFactory.responseCodes.add(200);
 		alvinToCoraRecordStorage.readList("place", DataGroup.withNameInData("filter"));
 	}
 
 	@Test
 	public void readPlaceListCallsFedoraAndReturnsConvertedResult() throws Exception {
 		// httpHandlerFactory.responseText = createXMLForPlaceList();
+		httpHandlerFactory.responseCodes.add(200);
 		httpHandlerFactory.responseTexts.add(createXMLForPlaceList());
 		addDummyResponsesForAllObjectsInList();
+
 		Collection<DataGroup> readPlaceList = alvinToCoraRecordStorage.readList("place",
 				DataGroup.withNameInData("filter")).listOfDataGroups;
 		assertEquals(httpHandlerFactory.urls.get(0), baseURL
@@ -373,6 +413,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	private void addDummyResponsesForAllObjectsInList() {
 		for (int i = 0; i < 6; i++) {
 			httpHandlerFactory.responseTexts.add("Dummy response text");
+			httpHandlerFactory.responseCodes.add(200);
 		}
 	}
 
