@@ -32,8 +32,7 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 	public void testConvertToFedoraXML() throws Exception {
 
 		HttpHandlerFactorySpy httpHandlerFactory = new HttpHandlerFactorySpy();
-		// httpHandlerFactory.responseText =
-		// ResourceReader.readResourceAsString("place/679.xml");
+		httpHandlerFactory.responseCodes.add(201);
 		httpHandlerFactory.responseTexts.add(ResourceReader.readResourceAsString("place/679.xml"));
 
 		String fedoraURL = "someFedoraURL";
