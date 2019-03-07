@@ -124,6 +124,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		String urlForNextPid = baseURL + "objects/nextPID?namespace=alvin-place&format=xml";
 		HttpHandler httpHandlerForPid = httpHandlerFactory.factor(urlForNextPid);
 		httpHandlerForPid.setRequestMethod("POST");
+		setAutorizationInHttpHandler(httpHandlerForPid);
 		throwErrorIfPidCouldNotBeFetched(httpHandlerForPid);
 		return httpHandlerForPid.getResponseText();
 	}
@@ -197,7 +198,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		String encodedDatastreamLabel = getEncodedLabel("Datastream created from cora");
 		return baseURL + OBJECTS_PART_OF_URL + nextPidFromFedora
 				+ "/datastreams/METADATA?controlGroup=M" + "&logMessage=coraWritten&dsLabel="
-				+ encodedDatastreamLabel + "&checksumType=SHA-512";
+				+ encodedDatastreamLabel + "&checksumType=SHA-512&mimeType=text/html";
 	}
 
 	@Override

@@ -1,3 +1,8 @@
 <place>
   <pid>alvin-place:680</pid>
+  <dsId>METADATA</dsId>
+  <defaultPlaceName>
+    <deleted>false</deleted>
+    <name>CORA_Uppsala_CORA</name>
+  </defaultPlaceName>
 </place>

@@ -146,6 +146,10 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	private void assertCorrectHttpHandlerForNextPid() {
 		HttpHandlerSpy httpHandlerForPid = httpHandlerFactory.factoredHttpHandlers.get(0);
 		assertEquals(httpHandlerForPid.requestMethod, "POST");
+		String encoded = getEncodedAuthorization();
+
+		assertEquals(httpHandlerForPid.requestProperties.get("Authorization"), "Basic " + encoded);
+
 		assertEquals(httpHandlerFactory.urls.get(0),
 				baseURL + "objects/nextPID?namespace=alvin-place" + "&format=xml");
 
@@ -185,7 +189,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(httpHandlerFactory.urls.get(2),
 				baseURL + "objects/next-pid:444/datastreams/METADATA?controlGroup=M"
 						+ "&logMessage=coraWritten&dsLabel=" + encodedLabel
-						+ "&checksumType=SHA-512");
+						+ "&checksumType=SHA-512&mimeType=text/html");
 		assertEquals(converterSpy.returnedNewXML, httpHandlerForDatastream.outputStrings.get(0));
 		assertTrue(httpHandlerForDatastream.responseCodeWasRequested);
 	}

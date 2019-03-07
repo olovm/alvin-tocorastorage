@@ -49,6 +49,7 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 	private XMLXPathParser parser;
 	private DocumentBuilderFactory documentBuilderFactory;
 	private TransformerFactory transformerFactory;
+	private Document document;
 
 	public static AlvinCoraToFedoraPlaceConverter usingHttpHandlerFactoryDocumentBuilderFactoryTransformerFactoryAndFedoraUrl(
 			HttpHandlerFactory httpHandlerFactory, DocumentBuilderFactory documentBuilderFactory,
@@ -118,24 +119,28 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 
 	@Override
 	public String toNewXML(DataGroup record) {
-		// DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		String xml = "";
 		try {
-			DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
-			// DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			Document document = docBuilder.newDocument();
+			// DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			document = docBuilder.newDocument();
 			Element rootElement = document.createElement("place");
 			document.appendChild(rootElement);
-			//
-			Element pid = createPidNodeUsingRecordAndDocument(record, document);
+			Element pid = createPidNodeUsingRecordAndDocument(record);
 			rootElement.appendChild(pid);
-			//
+			Element dsId = document.createElement("dsId");
+			dsId.appendChild(document.createTextNode("METADATA"));
+			rootElement.appendChild(dsId);
+
+			Element defaultName = createDefaultNameElement(record);
+
+			rootElement.appendChild(defaultName);
+
 			Transformer transformer = createTransformer();
 			StringWriter writer = new StringWriter();
-			addDocumentToWriterAndTransform(document, writer, transformer);
-			//
+			addDocumentToWriterAndTransform(writer, transformer);
 			xml = writer.toString();
-			//
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -152,15 +157,52 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 		// return "";
 	}
 
-	private Element createPidNodeUsingRecordAndDocument(DataGroup record, Document document) {
+	private Element createPidNodeUsingRecordAndDocument(DataGroup record) {
 		String recordId = getIdFromRecord(record);
 		Element pid = document.createElement("pid");
 		pid.appendChild(document.createTextNode(recordId));
 		return pid;
 	}
 
-	private void addDocumentToWriterAndTransform(Document document, StringWriter writer,
-			Transformer transformer) throws TransformerException {
+	private Element createDefaultNameElement(DataGroup record) {
+		String nameString = extractNameFromDataGroup(record);
+		Element defaultName = document.createElement("defaultPlaceName");
+		createAndAddDeletedNode(defaultName);
+		createAndAddNameNode(nameString, defaultName);
+		return defaultName;
+	}
+
+	private void createAndAddDeletedNode(Element parentElement) {
+		createTextNodeWithTagNameAndAddToParent("deleted", "false", parentElement);
+	}
+
+	private void createTextNodeWithTagNameAndAddToParent(String elementTagName,
+			String textNodeValue, Element parentElement) {
+		Element element = document.createElement(elementTagName);
+		element.appendChild(document.createTextNode(textNodeValue));
+		parentElement.appendChild(element);
+	}
+
+	private void createAndAddNameNode(String nameString, Element parentElement) {
+		createTextNodeWithTagNameAndAddToParent("name", nameString, parentElement);
+	}
+
+	private String extractNameFromDataGroup(DataGroup record) {
+		DataAttribute nameAttribute = DataAttribute.withNameInDataAndValue("type", "authorized");
+		Collection<DataGroup> authorizedNames = record
+				.getAllGroupsWithNameInDataAndAttributes("name", nameAttribute);
+
+		DataAttribute namePartAttribute = DataAttribute.withNameInDataAndValue("type",
+				"defaultName");
+		DataGroup authorizedName = authorizedNames.iterator().next();
+		Collection<DataGroup> nameParts = authorizedName
+				.getAllGroupsWithNameInDataAndAttributes("namePart", namePartAttribute);
+		DataGroup defaultNamePart = nameParts.iterator().next();
+		return defaultNamePart.getFirstAtomicValueWithNameInData("value");
+	}
+
+	private void addDocumentToWriterAndTransform(StringWriter writer, Transformer transformer)
+			throws TransformerException {
 		DOMSource source = new DOMSource(document);
 		StreamResult result = new StreamResult(writer);
 
@@ -169,10 +211,11 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 
 	private Transformer createTransformer()
 			throws TransformerFactoryConfigurationError, TransformerConfigurationException {
-		// TransformerFactory transformerFactory2 = TransformerFactory.newInstance();
+		TransformerFactory transformerFactory2 = TransformerFactory.newInstance();
 
-		Transformer transformer = transformerFactory.newTransformer();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		// Transformer transformer = transformerFactory.newTransformer();
+		Transformer transformer = transformerFactory2.newTransformer();
+		// transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 		return transformer;
