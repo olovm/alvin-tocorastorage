@@ -111,6 +111,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 			throws UnsupportedEncodingException {
 		String nextPidFromFedora = getPid();
 		createObjectForPlace(nextPidFromFedora);
+		// createRelationForObjectForPlace(nextPidFromFedora);
 		String newXML = convertRecordToXML(type, record);
 		createDatastreamForPlace(nextPidFromFedora, newXML);
 	}
@@ -124,7 +125,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		String urlForNextPid = baseURL + "objects/nextPID?namespace=alvin-place&format=xml";
 		HttpHandler httpHandlerForPid = httpHandlerFactory.factor(urlForNextPid);
 		httpHandlerForPid.setRequestMethod("POST");
-		setAutorizationInHttpHandler(httpHandlerForPid);
+		setAuthorizationInHttpHandler(httpHandlerForPid);
 		throwErrorIfPidCouldNotBeFetched(httpHandlerForPid);
 		return httpHandlerForPid.getResponseText();
 	}
@@ -146,7 +147,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		String url = createUrlForCreatingObjectInFedora(nextPidFromFedora);
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);
 		httpHandler.setRequestMethod("POST");
-		setAutorizationInHttpHandler(httpHandler);
+		setAuthorizationInHttpHandler(httpHandler);
 		int responseCode = httpHandler.getResponseCode();
 		throwErrorIfUnableToCreate(responseCode, "creating object in fedora failed");
 	}
@@ -164,7 +165,20 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		return encodedDatastreamLabel;
 	}
 
-	private void setAutorizationInHttpHandler(HttpHandler httpHandler) {
+	private void createRelationForObjectForPlace(String pid) throws UnsupportedEncodingException {
+		// String url = createUrlForCreatingObjectInFedora(nextPidFromFedora);
+		String url = baseURL + OBJECTS_PART_OF_URL + pid + "/relationships/new?"
+				+ "object=info:fedora/alvin-model:place"
+				+ "&predicate=info:fedora/fedora-system:def/hasModel#&isLiteral=true";
+
+		HttpHandler httpHandler = httpHandlerFactory.factor(url);
+		httpHandler.setRequestMethod("POST");
+		setAuthorizationInHttpHandler(httpHandler);
+		int responseCode = httpHandler.getResponseCode();
+		throwErrorIfNotOkFromFedora(pid, responseCode);
+	}
+
+	private void setAuthorizationInHttpHandler(HttpHandler httpHandler) {
 		String encoded = Base64.getEncoder().encodeToString(
 				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
 		httpHandler.setRequestProperty("Authorization", "Basic " + encoded);
@@ -186,7 +200,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 			throws UnsupportedEncodingException {
 		String urlForDataStream = createUrlForCreatingDatastreamInFedora(nextPidFromFedora);
 		HttpHandler httpHandlerForDatastream = httpHandlerFactory.factor(urlForDataStream);
-		setAutorizationInHttpHandler(httpHandlerForDatastream);
+		setAuthorizationInHttpHandler(httpHandlerForDatastream);
 		httpHandlerForDatastream.setRequestMethod("POST");
 		httpHandlerForDatastream.setOutput(newXML);
 		int responseCode = httpHandlerForDatastream.getResponseCode();
@@ -198,7 +212,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		String encodedDatastreamLabel = getEncodedLabel("Datastream created from cora");
 		return baseURL + OBJECTS_PART_OF_URL + nextPidFromFedora
 				+ "/datastreams/METADATA?controlGroup=M" + "&logMessage=coraWritten&dsLabel="
-				+ encodedDatastreamLabel + "&checksumType=SHA-512&mimeType=text/html";
+				+ encodedDatastreamLabel + "&checksumType=SHA-512&mimeType=text/xml";
 	}
 
 	@Override
@@ -252,7 +266,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private HttpHandler createHttpHandlerForUpdatingDatastreamUsingURL(String url) {
 		HttpHandler httpHandler = httpHandlerFactory.factor(url);
 		setRequestMethodForUpdatingDatastreamInFedora(httpHandler);
-		setAutorizationInHttpHandler(httpHandler);
+		setAuthorizationInHttpHandler(httpHandler);
 		return httpHandler;
 	}
 

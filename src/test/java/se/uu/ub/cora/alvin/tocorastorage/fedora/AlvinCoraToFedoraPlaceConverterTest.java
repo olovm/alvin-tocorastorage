@@ -101,7 +101,7 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 		// assertCreatedRootElementIsFirstChildAppendedToDocument(documentSpy);
 		//
 		// assertPidElementIsAppendedToRootElement(documentSpy);
-
+		//
 		// TransformerSpy transformerSpy = transformerFactory.transformers.get(0);
 		// assertEquals(transformerSpy.outputProperties.get(OutputKeys.OMIT_XML_DECLARATION),
 		// "yes");

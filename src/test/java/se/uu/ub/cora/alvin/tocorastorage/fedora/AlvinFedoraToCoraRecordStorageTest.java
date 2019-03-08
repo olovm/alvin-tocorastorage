@@ -189,7 +189,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(httpHandlerFactory.urls.get(2),
 				baseURL + "objects/next-pid:444/datastreams/METADATA?controlGroup=M"
 						+ "&logMessage=coraWritten&dsLabel=" + encodedLabel
-						+ "&checksumType=SHA-512&mimeType=text/html");
+						+ "&checksumType=SHA-512&mimeType=text/xml");
 		assertEquals(converterSpy.returnedNewXML, httpHandlerForDatastream.outputStrings.get(0));
 		assertTrue(httpHandlerForDatastream.responseCodeWasRequested);
 	}
