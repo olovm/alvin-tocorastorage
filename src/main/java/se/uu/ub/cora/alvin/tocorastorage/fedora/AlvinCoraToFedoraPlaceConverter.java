@@ -47,23 +47,16 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 	private HttpHandlerFactory httpHandlerFactory;
 	private String fedoraURL;
 	private XMLXPathParser parser;
-	private DocumentBuilderFactory documentBuilderFactory;
-	private TransformerFactory transformerFactory;
 	private Document document;
 
 	public static AlvinCoraToFedoraPlaceConverter usingHttpHandlerFactoryDocumentBuilderFactoryTransformerFactoryAndFedoraUrl(
-			HttpHandlerFactory httpHandlerFactory, DocumentBuilderFactory documentBuilderFactory,
-			TransformerFactory transformerFactory, String fedoraURL) {
-		return new AlvinCoraToFedoraPlaceConverter(httpHandlerFactory, documentBuilderFactory,
-				transformerFactory, fedoraURL);
+			HttpHandlerFactory httpHandlerFactory, String fedoraURL) {
+		return new AlvinCoraToFedoraPlaceConverter(httpHandlerFactory, fedoraURL);
 	}
 
 	private AlvinCoraToFedoraPlaceConverter(HttpHandlerFactory httpHandlerFactory,
-			DocumentBuilderFactory documentBuilderFactory, TransformerFactory transformerFactory,
 			String fedoraURL) {
 		this.httpHandlerFactory = httpHandlerFactory;
-		this.documentBuilderFactory = documentBuilderFactory;
-		this.transformerFactory = transformerFactory;
 		this.fedoraURL = fedoraURL;
 	}
 

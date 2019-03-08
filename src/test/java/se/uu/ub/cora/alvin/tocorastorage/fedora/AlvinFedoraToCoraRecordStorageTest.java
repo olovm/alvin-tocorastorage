@@ -117,11 +117,11 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		alvinToCoraRecordStorage.create("place", "alvin-place:22", record, collectedTerms, linkList,
 				dataDivider);
 
-		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 3);
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 4);
 
 		assertCorrectHttpHandlerForNextPid();
-
 		assertCorrectHttpHandlerForCreatingObject();
+		assertCorrectHttpHandlerForRelation();
 
 		assertEquals(converterFactory.factoredToFedoraConverters.size(), 1);
 		assertEquals(converterFactory.factoredToFedoraTypes.get(0), "place");
@@ -136,9 +136,11 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	private void setUpResponsesForOkCreate() {
 		httpHandlerFactory.responseCodes.add(200);
 		httpHandlerFactory.responseCodes.add(201);
+		httpHandlerFactory.responseCodes.add(200);
 		httpHandlerFactory.responseCodes.add(201);
 		httpHandlerFactory.responseTexts.add(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><pidList  xmlns=\"http://www.fedora.info/definitions/1/0/management/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/getNextPIDInfo.xsd\"><pid>next-pid:444</pid></pidList>");
+		httpHandlerFactory.responseTexts.add("Dummy response text");
 		httpHandlerFactory.responseTexts.add("Dummy response text");
 		httpHandlerFactory.responseTexts.add("Dummy response text");
 	}
@@ -170,6 +172,18 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertTrue(httpHandlerForObject.responseCodeWasRequested);
 	}
 
+	private void assertCorrectHttpHandlerForRelation() {
+		HttpHandlerSpy httpHandlerForRelation = httpHandlerFactory.factoredHttpHandlers.get(2);
+		assertEquals(httpHandlerForRelation.requestMethod, "POST");
+		String encoded = getEncodedAuthorization();
+
+		assertEquals(httpHandlerForRelation.requestProperties.get("Authorization"),
+				"Basic " + encoded);
+		assertEquals(httpHandlerFactory.urls.get(2), baseURL
+				+ "objects/next-pid:444/relationships/new?object=info:fedora/alvin-model:place"
+				+ "&predicate=info:fedora/fedora-system:def/hasModel#");
+	}
+
 	private String getEncodedAuthorization() {
 		String encoded = Base64.getEncoder().encodeToString(
 				(fedoraUsername + ":" + fedoraPassword).getBytes(StandardCharsets.UTF_8));
@@ -178,7 +192,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 
 	private void assertCorrectHttpHandlerForCreatingDatastream(
 			AlvinCoraToFedoraConverterSpy converterSpy) throws UnsupportedEncodingException {
-		HttpHandlerSpy httpHandlerForDatastream = httpHandlerFactory.factoredHttpHandlers.get(2);
+		HttpHandlerSpy httpHandlerForDatastream = httpHandlerFactory.factoredHttpHandlers.get(3);
 		assertEquals(httpHandlerForDatastream.requestMethod, "POST");
 		String encoded = getEncodedAuthorization();
 
@@ -186,7 +200,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				"Basic " + encoded);
 
 		String encodedLabel = URLEncoder.encode("Datastream created from cora", "UTF-8");
-		assertEquals(httpHandlerFactory.urls.get(2),
+		assertEquals(httpHandlerFactory.urls.get(3),
 				baseURL + "objects/next-pid:444/datastreams/METADATA?controlGroup=M"
 						+ "&logMessage=coraWritten&dsLabel=" + encodedLabel
 						+ "&checksumType=SHA-512&mimeType=text/xml");
@@ -222,7 +236,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	}
 
 	@Test
-	public void createPlaceErrorCreatingObjectDoNotCreateDatastreamAndThrowsException()
+	public void createPlaceErrorCreatingObjectDoNotCreateRelationOrDatastreamAndThrowsException()
 			throws Exception {
 		setUpResponsesForObjectCreationFailure();
 		DataGroup record = DataGroup.withNameInData("authority");
@@ -258,6 +272,45 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	}
 
 	@Test
+	public void createPlaceErrorCreatingRelationDoNotCreateDatastreamAndThrowsException()
+			throws Exception {
+		setUpResponsesForRelationCreationFailure();
+		DataGroup record = DataGroup.withNameInData("authority");
+
+		DataGroup collectedTerms = createCollectTermsWithRecordLabel();
+
+		DataGroup linkList = null;
+		String dataDivider = null;
+		boolean exceptionWasCaught = false;
+		try {
+			alvinToCoraRecordStorage.create("place", "alvin-place:22", record, collectedTerms,
+					linkList, dataDivider);
+		} catch (FedoraException e) {
+			exceptionWasCaught = true;
+			assertEquals(e.getMessage(),
+					"create in fedora failed with message: creating relation in fedora failed, with response code: 500");
+
+		}
+		assertTrue(exceptionWasCaught);
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 3);
+		assertCorrectHttpHandlerForNextPid();
+		assertCorrectHttpHandlerForCreatingObject();
+		assertCorrectHttpHandlerForRelation();
+
+		assertEquals(converterFactory.factoredToFedoraConverters.size(), 0);
+	}
+
+	private void setUpResponsesForRelationCreationFailure() {
+		httpHandlerFactory.responseCodes.add(200);
+		httpHandlerFactory.responseCodes.add(201);
+		httpHandlerFactory.responseCodes.add(500);
+		httpHandlerFactory.responseTexts.add(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><pidList  xmlns=\"http://www.fedora.info/definitions/1/0/management/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/getNextPIDInfo.xsd\"><pid>next-pid:444</pid></pidList>");
+		httpHandlerFactory.responseTexts.add("Dummy response");
+		httpHandlerFactory.responseTexts.add("Error from creating object");
+	}
+
+	@Test
 	public void createPlaceErrorCreatingDatastreamThrowsException() throws Exception {
 		setUpResponsesForDatastreamFailure();
 		DataGroup record = DataGroup.withNameInData("authority");
@@ -276,9 +329,10 @@ public class AlvinFedoraToCoraRecordStorageTest {
 					"create in fedora failed with message: creating datastream in fedora failed, with response code: 500");
 		}
 		assertTrue(exceptionWasCaught);
-		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 3);
+		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 4);
 		assertCorrectHttpHandlerForNextPid();
 		assertCorrectHttpHandlerForCreatingObject();
+		assertCorrectHttpHandlerForRelation();
 
 		assertEquals(converterFactory.factoredToFedoraConverters.size(), 1);
 	}
@@ -286,9 +340,11 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	private void setUpResponsesForDatastreamFailure() {
 		httpHandlerFactory.responseCodes.add(200);
 		httpHandlerFactory.responseCodes.add(201);
+		httpHandlerFactory.responseCodes.add(200);
 		httpHandlerFactory.responseCodes.add(500);
 		httpHandlerFactory.responseTexts.add(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><pidList  xmlns=\"http://www.fedora.info/definitions/1/0/management/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/getNextPIDInfo.xsd\"><pid>next-pid:444</pid></pidList>");
+		httpHandlerFactory.responseTexts.add("Dummy response text");
 		httpHandlerFactory.responseTexts.add("Dummy response text");
 		httpHandlerFactory.responseTexts.add("Error from creating object");
 	}

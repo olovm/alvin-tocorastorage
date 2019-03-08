@@ -32,15 +32,13 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 	public void testConvertToFedoraXML() throws Exception {
 
 		HttpHandlerFactorySpy httpHandlerFactory = new HttpHandlerFactorySpy();
-		DocumentBuilderFactorySpy builderFactorySpy = DocumentBuilderFactorySpy.newInstance();
-		TransformerFactorySpy transformerFactory = TransformerFactorySpy.newInstance();
 		httpHandlerFactory.responseCodes.add(201);
 		httpHandlerFactory.responseTexts.add(ResourceReader.readResourceAsString("place/679.xml"));
 
 		String fedoraURL = "someFedoraURL";
 		AlvinCoraToFedoraConverter converter = AlvinCoraToFedoraPlaceConverter
 				.usingHttpHandlerFactoryDocumentBuilderFactoryTransformerFactoryAndFedoraUrl(
-						httpHandlerFactory, builderFactorySpy, transformerFactory, fedoraURL);
+						httpHandlerFactory, fedoraURL);
 		DataGroup record = createPlace679DataGroup("alvin-place:679");
 
 		String xml = converter.toXML(record);
@@ -86,48 +84,14 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 		String fedoraURL = "someFedoraURL";
 		AlvinCoraToFedoraPlaceConverter converter = AlvinCoraToFedoraPlaceConverter
 				.usingHttpHandlerFactoryDocumentBuilderFactoryTransformerFactoryAndFedoraUrl(
-						httpHandlerFactory, builderFactorySpy, transformerFactory, fedoraURL);
+						httpHandlerFactory, fedoraURL);
 
 		DataGroup record = createPlace679DataGroup("alvin-place:680");
 
 		String xml = converter.toNewXML(record);
 
-		// DocumentBuilderSpy documentBuilderSpy =
-		// builderFactorySpy.factoredDocumentBuilders.get(0);
-		//
-		// DocumentSpy documentSpy = documentBuilderSpy.documents.get(0);
-		// assertEquals(documentSpy.createdTagNames.get(0), "place");
-		//
-		// assertCreatedRootElementIsFirstChildAppendedToDocument(documentSpy);
-		//
-		// assertPidElementIsAppendedToRootElement(documentSpy);
-		//
-		// TransformerSpy transformerSpy = transformerFactory.transformers.get(0);
-		// assertEquals(transformerSpy.outputProperties.get(OutputKeys.OMIT_XML_DECLARATION),
-		// "yes");
-		// assertEquals(transformerSpy.outputProperties.get(OutputKeys.INDENT), "yes");
-		// assertEquals(
-		// transformerSpy.outputProperties.get("{http://xml.apache.org/xslt}indent-amount"),
-		// "2");
-		//
-		// assertTrue(transformerSpy.source instanceof DOMSource);
-		// assertTrue(transformerSpy.result instanceof StreamResult);
-
 		assertEquals(xml, ResourceReader.readResourceAsString("place/expectedCreated680.xml"));
 
-	}
-
-	private void assertPidElementIsAppendedToRootElement(DocumentSpy documentSpy) {
-		ElementSpy pidElement = documentSpy.createdElements.get(1);
-		assertEquals(documentSpy.createdTagNames.get(1), "pid");
-		assertEquals(documentSpy.createdTextNodes.get(0), "alvin-place:680");
-
-		ElementSpy rootElement = documentSpy.createdElements.get(0);
-		assertEquals(rootElement.appendedChildren.get(0), pidElement);
-	}
-
-	private void assertCreatedRootElementIsFirstChildAppendedToDocument(DocumentSpy documentSpy) {
-		assertEquals(documentSpy.createdElements.get(0), documentSpy.appendedChildren.get(0));
 	}
 
 }

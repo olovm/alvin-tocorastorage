@@ -54,7 +54,7 @@ public class AlvinFedoraToCoraConverterFactoryImp implements AlvinFedoraConverte
 		HttpHandlerFactoryImp httpHandlerFactory = new HttpHandlerFactoryImp();
 		return AlvinCoraToFedoraPlaceConverter
 				.usingHttpHandlerFactoryDocumentBuilderFactoryTransformerFactoryAndFedoraUrl(
-						httpHandlerFactory, null, null, fedoraURL);
+						httpHandlerFactory, fedoraURL);
 	}
 
 	public String getFedoraURL() {
