@@ -181,7 +181,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 				"Basic " + encoded);
 		assertEquals(httpHandlerFactory.urls.get(2), baseURL
 				+ "objects/next-pid:444/relationships/new?object=info:fedora/alvin-model:place"
-				+ "&predicate=info:fedora/fedora-system:def/hasModel#");
+				+ "&predicate=info:fedora/fedora-system:def/model#hasModel");
 	}
 
 	private String getEncodedAuthorization() {

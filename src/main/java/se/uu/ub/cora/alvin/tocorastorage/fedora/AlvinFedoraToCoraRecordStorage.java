@@ -188,7 +188,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private String createUrlForCreatingRelationInFedora(String pid) {
 		return baseURL + OBJECTS_PART_OF_URL + pid + "/relationships/new?"
 				+ "object=info:fedora/alvin-model:place"
-				+ "&predicate=info:fedora/fedora-system:def/hasModel#";
+				+ "&predicate=info:fedora/fedora-system:def/model#hasModel";
 	}
 
 	private void setAuthorizationInHttpHandler(HttpHandler httpHandler) {
