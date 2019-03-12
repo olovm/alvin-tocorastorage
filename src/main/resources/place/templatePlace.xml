@@ -1,16 +1,16 @@
 <place id="1">
-	<pid>alvin-place:680</pid>
+	<pid></pid>
 	<dsId>METADATA</dsId>
 	<recordInfo id="2">
 		<externalDs>false</externalDs>
 		<lastAction>CREATED</lastAction>
 		<created id="3">
-			<date id="4"></date>
+			<date id="4">2019-03-11 09:27:22.306 UTC</date>
 			<user class="authenticatedUser" id="5">
-				<userId></userId>
-				<domain></domain>
-				<firstName></firstName>
-				<lastName></lastName>
+				<userId>dummy</userId>
+				<domain>uu</domain>
+				<firstName>d</firstName>
+				<lastName>u</lastName>
 				<email />
 			</user>
 			<note>Place created by Cora</note>
@@ -23,7 +23,7 @@
 	<regions id="7" />
 	<defaultPlaceName id="8">
 		<deleted>false</deleted>
-		<name>CORA_Uppsala_CORA</name>
+		<name></name>
 	</defaultPlaceName>
 	<placeNameForms id="9" />
 	<identifiers id="10" />

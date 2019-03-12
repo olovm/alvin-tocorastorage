@@ -22,9 +22,6 @@ package se.uu.ub.cora.alvin.tocorastorage.fedora;
 import java.io.StringWriter;
 import java.util.Collection;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -37,6 +34,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import se.uu.ub.cora.alvin.tocorastorage.ResourceReader;
 import se.uu.ub.cora.bookkeeper.data.DataAttribute;
 import se.uu.ub.cora.bookkeeper.data.DataGroup;
 import se.uu.ub.cora.httphandler.HttpHandler;
@@ -49,7 +47,7 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 	private XMLXPathParser parser;
 	private Document document;
 
-	public static AlvinCoraToFedoraPlaceConverter usingHttpHandlerFactoryDocumentBuilderFactoryTransformerFactoryAndFedoraUrl(
+	public static AlvinCoraToFedoraPlaceConverter usingHttpHandlerFactoryAndFedoraUrl(
 			HttpHandlerFactory httpHandlerFactory, String fedoraURL) {
 		return new AlvinCoraToFedoraPlaceConverter(httpHandlerFactory, fedoraURL);
 	}
@@ -112,42 +110,11 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 
 	@Override
 	public String toNewXML(DataGroup record) {
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		String xml = "";
-		try {
-			// DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			document = docBuilder.newDocument();
-			Element rootElement = document.createElement("place");
-			document.appendChild(rootElement);
-			Element pid = createPidNodeUsingRecordAndDocument(record);
-			rootElement.appendChild(pid);
-			Element dsId = document.createElement("dsId");
-			dsId.appendChild(document.createTextNode("METADATA"));
-			rootElement.appendChild(dsId);
-
-			Element defaultName = createDefaultNameElement(record);
-
-			rootElement.appendChild(defaultName);
-
-			Transformer transformer = createTransformer();
-			StringWriter writer = new StringWriter();
-			addDocumentToWriterAndTransform(writer, transformer);
-			xml = writer.toString();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		XMLXPathParser forXML = XMLXPathParser.forXML(xml);
-		return forXML.getDocumentAsString("/");
-		// return xml;
-		// return "";
+		String newPlaceTemplate = ResourceReader.readResourceAsString("place/templatePlace.xml");
+		parser = XMLXPathParser.forXML(newPlaceTemplate);
+		setStringFromDocumentUsingXPath("/place/pid", getIdFromRecord(record));
+		convertDefaultName(record);
+		return parser.getDocumentAsString("/");
 	}
 
 	private Element createPidNodeUsingRecordAndDocument(DataGroup record) {

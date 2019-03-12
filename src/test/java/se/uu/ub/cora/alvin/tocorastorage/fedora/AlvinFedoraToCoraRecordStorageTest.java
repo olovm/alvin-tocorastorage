@@ -165,7 +165,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(httpHandlerForObject.requestProperties.get("Authorization"),
 				"Basic " + encoded);
 
-		String encodedLabel = URLEncoder.encode("Place created from cora", "UTF-8");
+		String encodedLabel = urlEncode("Some Place Collected Name åäö");
 		assertEquals(httpHandlerFactory.urls.get(1),
 				baseURL + "objects/next-pid:444?namespace=alvin-place"
 						+ "&logMessage=coraWritten&label=" + encodedLabel);
@@ -200,7 +200,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(httpHandlerForDatastream.requestProperties.get("Authorization"),
 				"Basic " + encoded);
 
-		String encodedLabel = urlEncode("Datastream created from cora");
+		String encodedLabel = urlEncode("Some Place Collected Name åäö");
 		assertEquals(httpHandlerFactory.urls.get(3),
 				baseURL + "objects/next-pid:444/datastreams/METADATA?controlGroup=M"
 						+ "&logMessage=coraWritten&dsLabel=" + encodedLabel
