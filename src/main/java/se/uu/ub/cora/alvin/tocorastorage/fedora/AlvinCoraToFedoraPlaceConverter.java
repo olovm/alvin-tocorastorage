@@ -19,20 +19,7 @@
 
 package se.uu.ub.cora.alvin.tocorastorage.fedora;
 
-import java.io.StringWriter;
 import java.util.Collection;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import se.uu.ub.cora.alvin.tocorastorage.ResourceReader;
 import se.uu.ub.cora.bookkeeper.data.DataAttribute;
@@ -45,7 +32,6 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 	private HttpHandlerFactory httpHandlerFactory;
 	private String fedoraURL;
 	private XMLXPathParser parser;
-	private Document document;
 
 	public static AlvinCoraToFedoraPlaceConverter usingHttpHandlerFactoryAndFedoraUrl(
 			HttpHandlerFactory httpHandlerFactory, String fedoraURL) {
@@ -114,71 +100,20 @@ public class AlvinCoraToFedoraPlaceConverter implements AlvinCoraToFedoraConvert
 		parser = XMLXPathParser.forXML(newPlaceTemplate);
 		setStringFromDocumentUsingXPath("/place/pid", getIdFromRecord(record));
 		convertDefaultName(record);
+
+		DataGroup recordInfo = record.getFirstGroupWithNameInData("recordInfo");
+		convertCreatedBy(recordInfo);
+
+		String tsCreated = recordInfo.getFirstAtomicValueWithNameInData("tsCreated");
+		setStringFromDocumentUsingXPath("/place/recordInfo/created/date", tsCreated + " UTC");
+
 		return parser.getDocumentAsString("/");
 	}
 
-	private Element createPidNodeUsingRecordAndDocument(DataGroup record) {
-		String recordId = getIdFromRecord(record);
-		Element pid = document.createElement("pid");
-		pid.appendChild(document.createTextNode(recordId));
-		return pid;
-	}
-
-	private Element createDefaultNameElement(DataGroup record) {
-		String nameString = extractNameFromDataGroup(record);
-		Element defaultName = document.createElement("defaultPlaceName");
-		createAndAddDeletedNode(defaultName);
-		createAndAddNameNode(nameString, defaultName);
-		return defaultName;
-	}
-
-	private void createAndAddDeletedNode(Element parentElement) {
-		createTextNodeWithTagNameAndAddToParent("deleted", "false", parentElement);
-	}
-
-	private void createTextNodeWithTagNameAndAddToParent(String elementTagName,
-			String textNodeValue, Element parentElement) {
-		Element element = document.createElement(elementTagName);
-		element.appendChild(document.createTextNode(textNodeValue));
-		parentElement.appendChild(element);
-	}
-
-	private void createAndAddNameNode(String nameString, Element parentElement) {
-		createTextNodeWithTagNameAndAddToParent("name", nameString, parentElement);
-	}
-
-	private String extractNameFromDataGroup(DataGroup record) {
-		DataAttribute nameAttribute = DataAttribute.withNameInDataAndValue("type", "authorized");
-		Collection<DataGroup> authorizedNames = record
-				.getAllGroupsWithNameInDataAndAttributes("name", nameAttribute);
-
-		DataAttribute namePartAttribute = DataAttribute.withNameInDataAndValue("type",
-				"defaultName");
-		DataGroup authorizedName = authorizedNames.iterator().next();
-		Collection<DataGroup> nameParts = authorizedName
-				.getAllGroupsWithNameInDataAndAttributes("namePart", namePartAttribute);
-		DataGroup defaultNamePart = nameParts.iterator().next();
-		return defaultNamePart.getFirstAtomicValueWithNameInData("value");
-	}
-
-	private void addDocumentToWriterAndTransform(StringWriter writer, Transformer transformer)
-			throws TransformerException {
-		DOMSource source = new DOMSource(document);
-		StreamResult result = new StreamResult(writer);
-
-		transformer.transform(source, result);
-	}
-
-	private Transformer createTransformer()
-			throws TransformerFactoryConfigurationError, TransformerConfigurationException {
-		TransformerFactory transformerFactory2 = TransformerFactory.newInstance();
-
-		// Transformer transformer = transformerFactory.newTransformer();
-		Transformer transformer = transformerFactory2.newTransformer();
-		// transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-		return transformer;
+	private void convertCreatedBy(DataGroup recordInfo) {
+		DataGroup createdBy = recordInfo.getFirstGroupWithNameInData("createdBy");
+		String userId = createdBy.getFirstAtomicValueWithNameInData("linkedRecordId");
+		setStringFromDocumentUsingXPath("/place/recordInfo/created/user/userId", userId);
 	}
 
 }

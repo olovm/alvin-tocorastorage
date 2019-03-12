@@ -38,7 +38,7 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 		String fedoraURL = "someFedoraURL";
 		AlvinCoraToFedoraConverter converter = AlvinCoraToFedoraPlaceConverter
 				.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
-		DataGroup record = createPlace679DataGroup("alvin-place:679");
+		DataGroup record = createPlaceDataGroupUsingPid("alvin-place:679");
 
 		String xml = converter.toXML(record);
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
@@ -52,12 +52,20 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 
 	}
 
-	private DataGroup createPlace679DataGroup(String id) {
+	private DataGroup createPlaceDataGroupUsingPid(String id) {
 		DataGroup record = DataGroup.withNameInData("authority");
 		record.addAttributeByIdWithValue("type", "place");
 		DataGroup recordInfo = DataGroup.withNameInData("recordInfo");
 		record.addChild(recordInfo);
 		recordInfo.addChild(DataAtomic.withNameInDataAndValue("id", id));
+
+		DataGroup createdBy = DataGroup.withNameInData("createdBy");
+		recordInfo.addChild(createdBy);
+		createdBy.addChild(DataAtomic.withNameInDataAndValue("linkedRecordType", "coraUser"));
+		createdBy.addChild(DataAtomic.withNameInDataAndValue("linkedRecordId", "user1234"));
+
+		recordInfo.addChild(
+				DataAtomic.withNameInDataAndValue("tsCreated", "2019-03-11 09:27:22.306"));
 
 		DataGroup authorizedNameGroup = DataGroup.withNameInData("name");
 		record.addChild(authorizedNameGroup);
@@ -74,7 +82,7 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 		return record;
 	}
 
-	@Test(enabled = false)
+	@Test
 	public void testConvertToNewFedoraXML() throws Exception {
 		HttpHandlerFactorySpy httpHandlerFactory = new HttpHandlerFactorySpy();
 
@@ -82,7 +90,7 @@ public class AlvinCoraToFedoraPlaceConverterTest {
 		AlvinCoraToFedoraPlaceConverter converter = AlvinCoraToFedoraPlaceConverter
 				.usingHttpHandlerFactoryAndFedoraUrl(httpHandlerFactory, fedoraURL);
 
-		DataGroup record = createPlace679DataGroup("alvin-place:680");
+		DataGroup record = createPlaceDataGroupUsingPid("alvin-place:680");
 
 		String xml = converter.toNewXML(record);
 

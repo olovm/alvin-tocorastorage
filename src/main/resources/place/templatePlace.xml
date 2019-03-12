@@ -5,12 +5,12 @@
 		<externalDs>false</externalDs>
 		<lastAction>CREATED</lastAction>
 		<created id="3">
-			<date id="4">2019-03-11 09:27:22.306 UTC</date>
+			<date id="4"></date>
 			<user class="authenticatedUser" id="5">
-				<userId>dummy</userId>
-				<domain>uu</domain>
-				<firstName>d</firstName>
-				<lastName>u</lastName>
+				<userId></userId>
+				<domain>notUsed</domain>
+				<firstName>notUsed</firstName>
+				<lastName>notUsed</lastName>
 				<email />
 			</user>
 			<note>Place created by Cora</note>
