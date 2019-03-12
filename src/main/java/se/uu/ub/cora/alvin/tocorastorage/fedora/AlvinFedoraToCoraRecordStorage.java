@@ -91,7 +91,8 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	public void create(String type, String id, DataGroup record, DataGroup collectedTerms,
 			DataGroup linkList, String dataDivider) {
 		if (PLACE.equals(type)) {
-			createPlaceInFedora(type, id, record, collectedTerms);
+			String nextPidFromFedora = getPid();
+			createPlaceInFedora(type, nextPidFromFedora, record, collectedTerms);
 		} else {
 			throw NotImplementedException.withMessage("create is not implemented");
 		}
@@ -100,20 +101,19 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private void createPlaceInFedora(String type, String id, DataGroup record,
 			DataGroup collectedTerms) {
 		try {
-			tryToConvertAndCreatePlaceInFedora(type, record);
+			tryToConvertAndCreatePlaceInFedora(type, id, record);
 		} catch (Exception e) {
 			throw FedoraException.withMessageAndException(
 					"create in fedora failed with message: " + e.getMessage(), e);
 		}
 	}
 
-	private void tryToConvertAndCreatePlaceInFedora(String type, DataGroup record)
+	private void tryToConvertAndCreatePlaceInFedora(String type, String id, DataGroup record)
 			throws UnsupportedEncodingException {
-		String nextPidFromFedora = getPid();
-		createObjectForPlace(nextPidFromFedora);
-		createRelationToModelForPlace(nextPidFromFedora);
+		createObjectForPlace(id);
+		createRelationToModelForPlace(id);
 		String newXML = convertRecordToXML(type, record);
-		createDatastreamForPlace(nextPidFromFedora, newXML);
+		createDatastreamForPlace(id, newXML);
 	}
 
 	private String getPid() {
@@ -171,7 +171,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		return encodedDatastreamLabel;
 	}
 
-	private void createRelationToModelForPlace(String pid) {
+	private void createRelationToModelForPlace(String pid) throws UnsupportedEncodingException {
 		String url = createUrlForCreatingRelationInFedora(pid);
 		HttpHandler httpHandler = createHttpHandlerForWritingUsingUrlAndRequestMethod(url, "POST");
 		int responseCode = httpHandler.getResponseCode();
@@ -185,10 +185,17 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		}
 	}
 
-	private String createUrlForCreatingRelationInFedora(String pid) {
-		return baseURL + OBJECTS_PART_OF_URL + pid + "/relationships/new?"
-				+ "object=info:fedora/alvin-model:place"
-				+ "&predicate=info:fedora/fedora-system:def/model#hasModel";
+	private String createUrlForCreatingRelationInFedora(String pid)
+			throws UnsupportedEncodingException {
+		StringBuilder url = new StringBuilder(baseURL);
+		url.append(OBJECTS_PART_OF_URL);
+		url.append(pid);
+		url.append("/relationships/new?");
+		url.append("object=");
+		url.append(URLEncoder.encode("info:fedora/alvin-model:place", "UTF-8"));
+		url.append("&predicate=");
+		url.append(URLEncoder.encode("info:fedora/fedora-system:def/model#hasModel", "UTF-8"));
+		return url.toString();
 	}
 
 	private void setAuthorizationInHttpHandler(HttpHandler httpHandler) {

@@ -179,9 +179,10 @@ public class AlvinFedoraToCoraRecordStorageTest {
 
 		assertEquals(httpHandlerForRelation.requestProperties.get("Authorization"),
 				"Basic " + encoded);
-		assertEquals(httpHandlerFactory.urls.get(2), baseURL
-				+ "objects/next-pid:444/relationships/new?object=info:fedora/alvin-model:place"
-				+ "&predicate=info:fedora/fedora-system:def/model#hasModel");
+		assertEquals(httpHandlerFactory.urls.get(2),
+				baseURL + "objects/next-pid:444/relationships/new?object="
+						+ urlEncode("info:fedora/alvin-model:place") + "&predicate="
+						+ urlEncode("info:fedora/fedora-system:def/model#hasModel"));
 	}
 
 	private String getEncodedAuthorization() {
@@ -199,13 +200,22 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		assertEquals(httpHandlerForDatastream.requestProperties.get("Authorization"),
 				"Basic " + encoded);
 
-		String encodedLabel = URLEncoder.encode("Datastream created from cora", "UTF-8");
+		String encodedLabel = urlEncode("Datastream created from cora");
 		assertEquals(httpHandlerFactory.urls.get(3),
 				baseURL + "objects/next-pid:444/datastreams/METADATA?controlGroup=M"
 						+ "&logMessage=coraWritten&dsLabel=" + encodedLabel
 						+ "&checksumType=SHA-512&mimeType=text/xml");
 		assertEquals(converterSpy.returnedNewXML, httpHandlerForDatastream.outputStrings.get(0));
 		assertTrue(httpHandlerForDatastream.responseCodeWasRequested);
+	}
+
+	private String urlEncode(String stringToUrlEncode) {
+		try {
+			return URLEncoder.encode(stringToUrlEncode, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			assertTrue(false);
+		}
+		return null;
 	}
 
 	@Test
@@ -226,7 +236,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		} catch (FedoraException e) {
 			exceptionWasCaught = true;
 			assertEquals(e.getMessage(),
-					"create in fedora failed with message: getting next pid from fedora failed, with response code: 500");
+					"getting next pid from fedora failed, with response code: 500");
 		}
 		assertTrue(exceptionWasCaught);
 		assertEquals(httpHandlerFactory.factoredHttpHandlers.size(), 1);
