@@ -75,6 +75,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private DataGroup readAndConvertPlaceFromFedora(String id) {
 		HttpHandler httpHandler = createHttpHandlerForReadingPlace(id);
 		AlvinFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PLACE);
+		throwErrorIfNotOkFromFedora(id, httpHandler.getResponseCode());
 		return toCoraConverter.fromXML(httpHandler.getResponseText());
 	}
 
@@ -214,13 +215,14 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		}
 	}
 
-	private SpiderReadResult tryCreateSpiderReadResultFromReadingAndConvertingPlaceListInFedora() {
+	private SpiderReadResult tryCreateSpiderReadResultFromReadingAndConvertingPlaceListInFedora()
+			throws Exception {
 		SpiderReadResult spiderReadResult = new SpiderReadResult();
 		spiderReadResult.listOfDataGroups = (List<DataGroup>) tryReadAndConvertPlaceListFromFedora();
 		return spiderReadResult;
 	}
 
-	private Collection<DataGroup> tryReadAndConvertPlaceListFromFedora() {
+	private Collection<DataGroup> tryReadAndConvertPlaceListFromFedora() throws Exception {
 		String placeListXML = getPlaceListXMLFromFedora();
 		NodeList list = extractNodeListWithPidsFromXML(placeListXML);
 		return constructCollectionOfPlacesFromFedora(list);
@@ -245,7 +247,8 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 				.getNodeListFromDocumentUsingXPath("/result/resultList/objectFields/pid/text()");
 	}
 
-	private Collection<DataGroup> constructCollectionOfPlacesFromFedora(NodeList list) {
+	private Collection<DataGroup> constructCollectionOfPlacesFromFedora(NodeList list)
+			throws Exception {
 		Collection<DataGroup> placeList = new ArrayList<>();
 		for (int i = 0; i < list.getLength(); i++) {
 			Node node = list.item(i);

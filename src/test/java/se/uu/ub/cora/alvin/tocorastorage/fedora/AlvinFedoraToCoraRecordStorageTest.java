@@ -316,4 +316,21 @@ public class AlvinFedoraToCoraRecordStorageTest {
 		alvinToCoraRecordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(null,
 				null);
 	}
+
+	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
+			+ "update to fedora failed for record: alvin-place:22, with response code: 500")
+	public void responseCodeNotOkBeforeConverting() throws Exception {
+		httpHandlerFactory.responseCode = 500;
+		httpHandlerFactory.responseText = "Some response";
+		DataGroup readPlace = alvinToCoraRecordStorage.read("place", "alvin-place:22");
+	}
+
+	@Test
+	public void responseCodeOkBeforeConverting() throws Exception {
+		httpHandlerFactory.responseCode = 200;
+		httpHandlerFactory.responseText = "Some response";
+		DataGroup readPlace = alvinToCoraRecordStorage.read("place", "alvin-place:22");
+		assertEquals(httpHandlerFactory.responseText, "Some response");
+		assertNotNull(readPlace);
+	}
 }
