@@ -311,6 +311,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 
 	@Test(expectedExceptions = NotImplementedException.class, expectedExceptionsMessageRegExp = ""
 			+ "recordExistsForAbstractOrImplementingRecordTypeAndRecordId is not implemented")
+
 	public void recordExistsForAbstractOrImplementingRecordTypeAndRecordIdThrowsNotImplementedException()
 			throws Exception {
 		alvinToCoraRecordStorage.recordExistsForAbstractOrImplementingRecordTypeAndRecordId(null,
@@ -318,7 +319,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	}
 
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
-			+ "update to fedora failed for record: alvin-place:22, with response code: 500")
+			+ "read from fedora failed for record: alvin-place:22, with response code: 500")
 	public void responseCodeNotOkBeforeConverting() throws Exception {
 		httpHandlerFactory.responseCode = 500;
 		httpHandlerFactory.responseText = "Some response";
