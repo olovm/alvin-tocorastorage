@@ -197,7 +197,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	}
 
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
-			+ "update to fedora failed for record: alvin-place:22")
+			+ "update failed for record: alvin-place:22")
 	public void updateIfNotOkFromFedoraThrowException() throws Exception {
 		httpHandlerFactory.responseText = "Dummy response text";
 		httpHandlerFactory.responseCode = 505;
@@ -210,7 +210,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	}
 
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
-			+ "update to fedora failed for record: alvin-place:23")
+			+ "update failed for record: alvin-place:23")
 	public void updateIfNotOkFromFedoraThrowExceptionOtherRecord() throws Exception {
 		httpHandlerFactory.responseText = "Dummy response text";
 		httpHandlerFactory.responseCode = 500;
@@ -319,7 +319,7 @@ public class AlvinFedoraToCoraRecordStorageTest {
 	}
 
 	@Test(expectedExceptions = FedoraException.class, expectedExceptionsMessageRegExp = ""
-			+ "read from fedora failed for record: alvin-place:22, with response code: 500")
+			+ "read failed for record: alvin-place:22, with response code: 500")
 	public void responseCodeNotOkBeforeConverting() throws Exception {
 		httpHandlerFactory.responseCode = 500;
 		httpHandlerFactory.responseText = "Some response";

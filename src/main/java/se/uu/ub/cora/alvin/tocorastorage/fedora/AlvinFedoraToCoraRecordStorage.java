@@ -75,7 +75,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 	private DataGroup readAndConvertPlaceFromFedora(String id) {
 		HttpHandler httpHandler = createHttpHandlerForReadingPlace(id);
 		AlvinFedoraToCoraConverter toCoraConverter = converterFactory.factorToCoraConverter(PLACE);
-		throwErrorIfNotOkFromFedora("read from", id, httpHandler.getResponseCode());
+		throwErrorIfNotOkFromFedora("read", id, httpHandler.getResponseCode());
 		return toCoraConverter.fromXML(httpHandler.getResponseText());
 	}
 
@@ -118,8 +118,7 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		try {
 			tryToConvertAndWritePlaceToFedora(type, id, record, collectedTerms);
 		} catch (Exception e) {
-			throw FedoraException
-					.withMessageAndException("update to fedora failed for record: " + id, e);
+			throw FedoraException.withMessageAndException("update failed for record: " + id, e);
 		}
 	}
 
@@ -130,12 +129,12 @@ public final class AlvinFedoraToCoraRecordStorage implements RecordStorage {
 		String fedoraXML = convertRecordToFedoraXML(type, record);
 		httpHandler.setOutput(fedoraXML);
 		int responseCode = httpHandler.getResponseCode();
-		throwErrorIfNotOkFromFedora("update to", id, responseCode);
+		throwErrorIfNotOkFromFedora("update", id, responseCode);
 	}
 
-	private void throwErrorIfNotOkFromFedora(String action, String id, int responseCode) {
+	private void throwErrorIfNotOkFromFedora(String fedoraOperation, String id, int responseCode) {
 		if (200 != responseCode) {
-			throw FedoraException.withMessage(action + " fedora failed for record: " + id
+			throw FedoraException.withMessage(fedoraOperation + " failed for record: " + id
 					+ ", with response code: " + responseCode);
 		}
 	}
